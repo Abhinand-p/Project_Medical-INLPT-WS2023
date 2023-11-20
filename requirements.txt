@@ -1,1 +1,10 @@
 # Required modules to be installed by pip
+matplotlib
+gensim
+pandas
+seaborn
+scikit-learn
+spacy
+selenium
+webdriver-manager
+tqdm
