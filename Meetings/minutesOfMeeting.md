@@ -26,3 +26,14 @@
 | Cloud-based Storage               | John Hildenbrand<br/>Hussein Abdulreda    |
 | Training Search Engine            | Behrooz Montazeran<br/>Abhinand Poosarala |
 | User Interface                    | John Hildenbrand<br/>Hussein Abdulreda    |
+
+## 20 - November - 2023 20:00
+| Topics                | Discussion                                                                    | 
+|-----------------------|-------------------------------------------------------------------------------|
+| Data Acquisition      | Discussed 3 methods(Web crawler, API method and EDirect) on data acquisition. |
+| Front-end development | Saw the Front-end development of the web-page, chat-bot interaction.          |
+| Overall pipeline      | Overview idea on storage, LLM, vector DB ...                                  |
+
+### Takeaway from the meeting
+1. After Data Acquisition method, post processing is needed to select the important data.
+2. In front-end development, the user entered query should be processed before passing it to the LLM.
