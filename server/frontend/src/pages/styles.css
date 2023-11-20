@@ -1,0 +1,103 @@
+@font-face {
+  font-family: "robotFont";
+  src: url("./game-robot.ttf");
+}
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.logo img {
+  width: 50px;
+  height: 50px;
+  margin-left: 20px;
+}
+
+.container {
+  margin: auto;
+  padding: 0px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  height: 100%;
+}
+
+.navbar {
+  height: 60px;
+  background-color: #98db6e;
+  position: relative;
+}
+
+.nav-elements ul {
+  display: flex;
+  justify-content: space-between;
+  list-style-type: none;
+}
+
+.nav-elements ul li {
+  margin-right: 40px;
+}
+
+.nav-elements ul a {
+  font-size: 16px;
+  font-weight: 400;
+  color: black;
+  text-decoration: none;
+  font-family: "robotFont";
+}
+
+.nav-elements ul a:hover {
+  color: white;
+}
+
+.body {
+  height: 100vh;
+}
+
+.homeLink {
+  text-decoration: "none";
+  color: black;
+  font-size: 25px;
+  font-family: "robotFont";
+}
+
+.listItems h1 {
+  list-style-type: "none";
+  font-weight: bold;
+  font-size: 20px;
+  font-family: "Times New Roman", Times, serif;
+}
+
+.MuiListItem-root .MuiTouchRipple-child {
+  background-color: black;
+}
+
+.spacer {
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  top: 10%;
+  bottom: 0;
+  left: 13.5%;
+  right: 0;
+  margin: auto;
+
+  backdrop-filter: sepia(80%);
+  border: 5px solid black;
+  height: 300px;
+  width: 700px;
+}
+
+.textField {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  color: green;
+  background-color: green;
+}
+
+.promptButton {
+  size: 100%;
+  background-color: green;
+  color: black;
+}
