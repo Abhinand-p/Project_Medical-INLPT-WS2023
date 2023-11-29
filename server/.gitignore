@@ -140,3 +140,4 @@ cython_debug/
 
 lgs/
 new_backend/
+test/
