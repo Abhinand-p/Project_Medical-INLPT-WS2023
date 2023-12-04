@@ -37,3 +37,14 @@
 ### Takeaway from the meeting
 1. After Data Acquisition method, post processing is needed to select the important data.
 2. In front-end development, the user entered query should be processed before passing it to the LLM.
+
+## 4 - December - 2023 20:00
+| Topics                | Discussion                                                              | 
+|-----------------------|-------------------------------------------------------------------------|
+| Data Acquisition      | Pushed raw data to github. Next step post processing and data analysis. |
+| Overall pipeline      | Pipeline diagram discussed.                                             |
+
+### Takeaways from the meeting
+1. SingleStore Vector DB
+2. Bio BERT
+3. Indexing and Semantic Search
