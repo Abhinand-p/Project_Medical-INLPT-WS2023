@@ -1,3 +1,11 @@
 .vscode
 .venv
 .env
+
+crawler/__pycache__
+
+
+# Testing
+test
+crawler/article.txt
+
