@@ -1,8 +1,7 @@
-from typing import Union
 from fastapi import FastAPI
-from fastapi import Body
 from fastapi.middleware.cors import CORSMiddleware
-#from transformers import pipeline
+from backend.api.router import router
+# from transformers import pipeline
 
 app = FastAPI()
 
@@ -16,10 +15,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
-
-@app.post("/convert")
-def convert_text(text: str = Body(..., embed=True)):
-    return {text.lower()}
+app.include_router(router)
