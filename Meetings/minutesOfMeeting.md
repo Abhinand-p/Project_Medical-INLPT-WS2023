@@ -48,3 +48,18 @@
 1. SingleStore Vector DB
 2. Bio BERT
 3. Indexing and Semantic Search
+
+## 11 - December - 2023 20:00
+| Topics                                    | Status  |
+|-------------------------------------------|---------|
+| Post processing                           | Done    | 
+| VectorDB first implementation             | Done    | 
+| UI first loop                             | Ongoing |
+| Questions to tutor                        | Ongoing |
+| Creating custom dataset for benchmarking  | Ongoing |
+
+### Next points to discuss 
+1. Handle Mis-spelling and synonyms 
+2. Identify other tasks like this so this can be put forward to the tutor
+3. Types of LLMs to use
+4. Finding a cloud server that hosts both the dataset and model
