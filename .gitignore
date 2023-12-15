@@ -2,10 +2,11 @@
 .venv
 .env
 
-crawler/__pycache__
+data_acquisition/__pycache__
 
 
 # Testing
 test
-crawler/article.txt
-
+data_pool/article.txt
+data_pool/articles.csv
+data_pool/articles.txt
