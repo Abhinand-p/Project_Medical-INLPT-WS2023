@@ -63,3 +63,17 @@
 2. Identify other tasks like this so this can be put forward to the tutor
 3. Types of LLMs to use
 4. Finding a cloud server that hosts both the dataset and model
+
+## 15 - December - 2023 12:30
+## Tutor meeting
+
+1. We need to change the embedding method of performing for the whole abstracts.
+2. Refer the lecture to understand the question types. We have to analyze it and proceed one at a time.
+3. As we are using a multiple database for a meta-data and vector database, we need to reduce the footprints as it is not preferable.
+4. All decisions should be logged in the experiment section in git.
+5. All team members should follow contribution tagging on the repo.
+6. We should try to convert the repository to an organization so the tutor can be made to admin.
+7. We should decide on the Must-to Have / Should have / Nice to have features.
+8. Baselines should be created (TFIDF Retrieval / Semantic Search)
+9. Utilizing ChatGPT data or about another system retrieval method to set as a baseline model.
+10. The whole process experience is graded here, and the experiments have to justify the decisions.
