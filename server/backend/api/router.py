@@ -25,3 +25,5 @@ def read_item(item_id: int, q: Union[str, None] = None):
 def convert_text(text: str = Body(..., embed=True)):
     return {text.lower()}
 
+
+
