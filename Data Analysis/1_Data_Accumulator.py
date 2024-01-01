@@ -1,6 +1,7 @@
 import pandas as pd
 import glob
 
+# Change the path accordingly
 files = glob.glob("/Users/abhinandp/PycharmProjects/project-INLPT-WS2023/Data Pool/Data/Articles_*.csv")
 
 dataframes = []
