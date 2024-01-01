@@ -1,7 +1,7 @@
 import pandas as pd
 import glob
 
-files = glob.glob("Articles_*.csv")
+files = glob.glob("/Users/abhinandp/PycharmProjects/project-INLPT-WS2023/Data Pool/Data/Articles_*.csv")
 
 dataframes = []
 
