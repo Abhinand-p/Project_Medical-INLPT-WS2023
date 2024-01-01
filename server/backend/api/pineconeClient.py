@@ -1,5 +1,4 @@
 import pinecone
-import os
 import json
 
 
@@ -13,8 +12,6 @@ class PineconeOperations:
             environment="gcp-starter"
         )
         self.index = pinecone.Index("inlp-med-ws2324")
-
-
 
     def fetch_stats(self):
         # fetches stats about the index

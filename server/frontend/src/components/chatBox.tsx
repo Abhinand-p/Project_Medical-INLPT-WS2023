@@ -19,17 +19,39 @@ const MAX_CHARACTERS = 4000;
 const ChatComponent: React.FC = () => {
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
+  const [data, setData] = useState<string>("");
 
-  const handleSendMessage = () => {
-    setMessages([...messages, { text: newMessage, type: "user" }]);
-    setNewMessage("");
-    setTimeout(() => {
-      setMessages((prevMessages: any) => [
-        ...prevMessages,
-        { text: "Ja, mache ich", type: "assistant" },
-      ]);
-    }, 1000);
-  };
+  const request = new Request("http://127.0.0.1:8000/questions-answering", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      text: newMessage,
+    }),
+  });
+
+  async function handleSendMessage() {
+    try {
+      const response = await fetch(request);
+      const data = await response.json();
+      if (response.status === 200) {
+        console.log("Success", data);
+        setData(data);
+        setMessages([...messages, { text: newMessage, type: "user" }]);
+        console.log(newMessage);
+        setNewMessage("");
+        setMessages((prevMessages: any) => [
+          ...prevMessages,
+          { text: data, type: "assistant" },
+        ]);
+      } else {
+        console.log("Server Error", data.error.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <Box

@@ -94,10 +94,10 @@ const Wrapper = () => {
                 </ListItemButton>
               </ListItem>
             </Link>
-            <Link href="/history" style={{ textDecoration: "none" }}>
+            <Link href="/about" style={{ textDecoration: "none" }}>
               <ListItem>
                 <ListItemButton>
-                  <ListItemIcon>History</ListItemIcon>
+                  <ListItemIcon>About</ListItemIcon>
                 </ListItemButton>
               </ListItem>
             </Link>
