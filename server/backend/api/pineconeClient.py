@@ -22,6 +22,10 @@ class PineconeOperations:
         # query from the index, eg: [0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3,....]
         response = self.index.query(
             vector=query_vector,
-            top_k=1,
+            top_k=3,
         )
-        return json.loads(str(response).replace("'", '"'))
+        res = json.loads(str(response).replace("'", '"'))
+        print(response)
+        print(res)
+        
+        return res
