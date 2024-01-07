@@ -1,12 +1,17 @@
 from typing import Union
-from fastapi import Body
-from fastapi import Header, APIRouter
+from fastapi import Body, APIRouter, HTTPException
 #from api import db_manager
 from faunadb import query as q
 from faunadb.client import FaunaClient
 from api import pineconeClient
 from sentence_transformers import SentenceTransformer
-
+import os
+from langchain.chat_models import ChatOpenAI
+from langchain.schema import (
+    SystemMessage,
+    HumanMessage,
+    AIMessage
+)
 router = APIRouter()
 
 
@@ -22,11 +27,11 @@ router = APIRouter()
 
 #Initialize FaunaDB
 client = FaunaClient(
-  secret="fnAFVGT2DnAAzKCbNx04jSXn6UGEmjU2xheJIW9e",
+  secret="fnAFXCXwtRAAzbZaH3YURuEnoGu7Np6vhjhnl5Tp",
 )
 
 #DOWNLOAD embedding model
-embedding_model = SentenceTransformer('pritamdeka/S-PubMedBert-MS-MARCO')
+embedding_model = SentenceTransformer('intfloat/e5-large-v2')
 
 #Initialize pinecone manager
 pineconeOps = pineconeClient.PineconeOperations()
@@ -39,6 +44,9 @@ async def create_index(text: str = Body(..., embed=True)):
     ------ToDo------
     3. Put abstract_text into model function
     """
+    if not text:
+        raise HTTPException(status_code=400, detail="Question cannot be empty")
+
     embedded_question = embedding_model.encode(text).tolist()
     
     abstractId = pineconeOps.query(query_vector=embedded_question)["matches"][0]["id"]
@@ -49,3 +57,49 @@ async def create_index(text: str = Body(..., embed=True)):
     
     
     return abstract_text["data"][0]
+  
+  
+"""1. Attempt for prototype: local approach"""
+
+chat = ChatOpenAI(
+    openai_api_key= "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",
+    model='gpt-3.5-turbo'
+)
+
+@router.post("/get-answer-from-local")
+def get_answer(question: str= Body(..., embed=True)):
+  if not question:
+    raise HTTPException(status_code=400, detail="Question cannot be empty")
+
+  embedded_question = embedding_model.encode(question).tolist()
+    
+  abstractId = pineconeOps.query(query_vector=embedded_question)["matches"][0]["id"]
+  abstract_data = client.query(
+    q.paginate(q.match(q.index("metadata"), abstractId)))
+    
+  print(abstract_data)
+    
+  abstract_text = abstract_data["data"][0][1] + abstract_data["data"][0][0] + abstract_data["data"][0][2]
+
+
+  messages = [
+    SystemMessage(content="Try to answer the question with the given context, if the answer lies not in the context say so but still try to answer the question"),
+]
+  
+  
+  augmented_prompt = f"""Using the contexts below, answer the query.
+  Contexts:
+  {abstract_text}
+  Query: {question}"""
+  
+  prompt = HumanMessage(
+    content=augmented_prompt
+  )
+  messages.append(prompt)
+
+
+  res = chat(messages)
+    
+
+  return res.content
+  
