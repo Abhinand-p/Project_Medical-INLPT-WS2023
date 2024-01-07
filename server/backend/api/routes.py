@@ -44,9 +44,7 @@ async def create_index(text: str = Body(..., embed=True)):
     ------ToDo------
     3. Put abstract_text into model function
     """
-    if not text:
-        raise HTTPException(status_code=400, detail="Question cannot be empty")
-
+    
     embedded_question = embedding_model.encode(text).tolist()
     
     abstractId = pineconeOps.query(query_vector=embedded_question)["matches"][0]["id"]
@@ -58,8 +56,14 @@ async def create_index(text: str = Body(..., embed=True)):
     
     return abstract_text["data"][0]
   
+@router.post("/healthcheck")
+async def mirror(text: str = Body(..., embed= True)):
+  return text
+  
+  
   
 """1. Attempt for prototype: local approach"""
+
 
 chat = ChatOpenAI(
     openai_api_key= "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",
@@ -68,38 +72,30 @@ chat = ChatOpenAI(
 
 @router.post("/get-answer-from-local")
 def get_answer(question: str= Body(..., embed=True)):
-  if not question:
-    raise HTTPException(status_code=400, detail="Question cannot be empty")
-
+  """ Workflow:
+  1. Embedd question which is the text attribute
+  2. Query most relevant abstract with Pinecone + FaunaDB
+  3. Create the prompt, put together context (abstract_text), prompt command (SystemMessage) and User query (HumanMessage)
+  4. Query prompt to LLM and return the answer
+  """ 
   embedded_question = embedding_model.encode(question).tolist()
-    
   abstractId = pineconeOps.query(query_vector=embedded_question)["matches"][0]["id"]
   abstract_data = client.query(
-    q.paginate(q.match(q.index("metadata"), abstractId)))
-    
-  print(abstract_data)
-    
+    q.paginate(q.match(q.index("metadata"), abstractId))) 
   abstract_text = abstract_data["data"][0][1] + abstract_data["data"][0][0] + abstract_data["data"][0][2]
-
-
+  print(abstract_text)
   messages = [
     SystemMessage(content="Try to answer the question with the given context, if the answer lies not in the context say so but still try to answer the question"),
-]
-  
-  
+    ]
   augmented_prompt = f"""Using the contexts below, answer the query.
   Contexts:
   {abstract_text}
   Query: {question}"""
-  
   prompt = HumanMessage(
     content=augmented_prompt
   )
   messages.append(prompt)
-
-
   res = chat(messages)
     
-
   return res.content
   
