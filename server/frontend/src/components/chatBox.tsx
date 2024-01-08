@@ -21,32 +21,40 @@ const ChatComponent: React.FC = () => {
   const [newMessage, setNewMessage] = useState<string>("");
   const [data, setData] = useState<string>("");
 
-  const request = new Request("http://127.0.0.1:8000/questions-answering", {
+  const request = new Request("http://127.0.0.1:8000/get-answer-from-local", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      text: newMessage,
+      question: newMessage,
     }),
   });
 
+  const checkInput = () => {
+    if (newMessage.trim() != "") {
+      handleSendMessage();
+    } else {
+      alert("Message can't be empty!");
+    }
+  };
+
   async function handleSendMessage() {
+    console.log(newMessage);
+    setMessages([...messages, { text: newMessage, type: "user" }]);
+    setNewMessage("");
     try {
       const response = await fetch(request);
       const data = await response.json();
+      console.log(data);
+
       if (response.status === 200) {
-        console.log("Success", data);
-        setData(data);
-        setMessages([...messages, { text: newMessage, type: "user" }]);
-        console.log(newMessage);
-        setNewMessage("");
         setMessages((prevMessages: any) => [
           ...prevMessages,
           { text: data, type: "assistant" },
         ]);
       } else {
-        console.log("Server Error", data.error.message);
+        console.log("Something went wrong");
       }
     } catch (error) {
       console.log(error);
@@ -128,7 +136,7 @@ const ChatComponent: React.FC = () => {
         <Typography variant="body2">
           {MAX_CHARACTERS - newMessage.length}/4000
         </Typography>
-        <Button onClick={handleSendMessage} variant="contained">
+        <Button onClick={checkInput} variant="contained">
           Send
         </Button>
       </Box>
