@@ -6,6 +6,7 @@ from faunadb.client import FaunaClient
 from api import pineconeClient
 from sentence_transformers import SentenceTransformer
 import os
+from model import get_data
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import (
     SystemMessage,
@@ -39,26 +40,25 @@ embedding_model = SentenceTransformer('intfloat/e5-large-v2')
 #Initialize pinecone manager
 pineconeOps = pineconeClient.PineconeOperations()
 
-@router.post("/questions-answering")
-async def create_index(text: str = Body(..., embed=True)):
+@router.post("/get-answer-from-local")
+def get_answer_1(question: str= Body(..., embed=True)):
   """ Workflow:
   1. Embedd question which is the text attribute
   2. Query most relevant abstract with Pinecone + FaunaDB
-  ------ToDo------
-  3. Put abstract_text into model function
-  """
-  embedded_question = embedding_model.encode(text).tolist()
+  3. Create the prompt, put together context (abstract_text), prompt command (SystemMessage) and User query (HumanMessage)
+  4. Query prompt to LLM and return the answer
+  """ 
+  embedded_question = embedding_model.encode(question).tolist()
   abstracts = pineconeOps.query(query_vector=embedded_question)
   context = ""
   check_prompt_size = 0
-  
   #Query metadata of top 3 chunks, check if returned chunks exceed input limit or not
   def queryMetaData(abstractId, check_prompt_size):
     abstract_data = client.query(
     q.paginate(q.match(q.index("metadata"), abstractId))) 
     chunk_with_local_context = abstract_data["data"][0][1] + abstract_data["data"][0][0] +abstract_data["data"][0][2]
     check_prompt_size += len(chunk_with_local_context.split())
-    if(check_prompt_size < model_max_input + len(text.split())):
+    if(check_prompt_size < model_max_input + len(question.split())):
       return (chunk_with_local_context,check_prompt_size ) 
     else:
       print("Prompt exceeded models max input size!")
@@ -68,14 +68,14 @@ async def create_index(text: str = Body(..., embed=True)):
     data = queryMetaData(abstract["id"],check_prompt_size)
     check_prompt_size += data[1]
     print(check_prompt_size)
+    
     context = context + f"""Chunk {id}: {data[0]}""" 
 
-  #Context is now ready
   print(context)  
-    
-  """ToDo: """
+  res = get_data(question, context)
   
-  return context
+    
+  return res
   
   
   
@@ -128,7 +128,7 @@ def get_answer(question: str= Body(..., embed=True)):
     SystemMessage(content="You are a friendly assistant that will answer questions"),
     ]
   
-  augmented_prompt = f"""Try to to answer the question with the Chunks. If thats not possible say so and answer it with your own knowledge
+  augmented_prompt = f"""Try to to answer the question with the Chunks. The the chunks dont provide information to answer explictily say so. Answer the question with your own knowledge.
   Contexts:
   {context}
   Query: {question}"""
