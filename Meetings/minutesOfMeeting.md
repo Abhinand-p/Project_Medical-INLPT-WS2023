@@ -77,3 +77,13 @@
 8. Baselines should be created (TFIDF Retrieval / Semantic Search)
 9. Utilizing ChatGPT data or about another system retrieval method to set as a baseline model.
 10. The whole process experience is graded here, and the experiments have to justify the decisions.
+
+## 8 - January - 2024 20:00
+1. Discussed about the model that will be presented at the first-milestone.
+2. Evaluation metrics - questions generation methods.
+3. Tokenization methods - different approaches 
+
+### Next points to discuss 
+1. Implementing a local lama-2 model for question generations.
+2. Implementing a template to capture questions and answers from ChatGPT to use as an evaluation metric.
+3. Completing the vanilla RAG model before improving any specific tasks.
