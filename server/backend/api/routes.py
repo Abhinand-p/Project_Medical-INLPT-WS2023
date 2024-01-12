@@ -39,12 +39,7 @@ def get_answer_1(question: str= Body(..., embed=True)):
     
   return question
   
-  
-  
-  
-  
 """1. Attempt for prototype: local approach"""
-
 
 #Initialize connection to opensearch
 host = 'localhost'
