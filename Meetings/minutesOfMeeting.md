@@ -87,3 +87,17 @@
 1. Implementing a local lama-2 model for question generations.
 2. Implementing a template to capture questions and answers from ChatGPT to use as an evaluation metric.
 3. Completing the vanilla RAG model before improving any specific tasks.
+
+## 11 - January - 2024 13:30 First Milestone with the Tutor
+
+### Import Points discussed:
+1. Opensearch
+2. Spell checker
+3. Synchronization
+4. Unified Database 
+5. Evaluation System (100 pairs)
+
+## 15 - January - 2024 20:00
+1. Switch to move-over to opensearch as a single data source.
+2. New data-set containing abstract along with metadata.
+3. Evaluation techniques.
