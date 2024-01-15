@@ -6,9 +6,9 @@ This repository contains codes used to perform question generation that can be u
 1. This method can be used to generate Confirmation Questions based on the set regular expression.
 2. The method is easy to implement and scale based on the selected words.
 
-## 2. BioBART Based
+## 2. BioBERT Based
 ### Notes
-1. This method uses the pretrained BioBART model to generate the questions.
+1. This method uses the pretrained BioBERT model to generate the questions.
 2. Pre-training would be required to obtain an optimal question generation.
 3. Further checking is required to improve the quality of questions generated here.
 
