@@ -1,0 +1,8 @@
+These are instructions on how to set up openSearch locally:
+
+1. Go to terminal
+2. Make sure to give docker enough memory by: vm.max_map_count=262144 
+3. Set up openSearch nodes, navigate to: "openSearch" folder, run: docker compose up 
+4. Prepare data for upload to openSearch, run: "embedding\strategy-3\sentenceTransformerTexplitter.ipynb" which will store a txt file wth all the data
+5. Create index and upload data to openSearch, run "openSearch\openSearchClient.ipynb"
+6. Look at "openSearch\queryFromOpenSearch.ipynb" to check how the python client works

@@ -1,4 +1,5 @@
 import json
+from io import StringIO
 import pandas as pd
 from fastapi import Header, APIRouter
 from azure.ai.ml import MLClient
@@ -24,7 +25,6 @@ def get_data(question, context):
     online_endpoint_name = "biobert-pubmed-qa"
     deployment_name = "nlpt-biobert"
 
-
     question = question.replace("'", "\\'").replace('"', '\\"')
     context = context.replace("'", "\\'").replace('"', '\\"')
 
@@ -45,7 +45,15 @@ def get_data(question, context):
         request_file="./query.json",
     )
     print("raw response: \n", response, "\n")
-    # convert the json response to a pandas dataframe
-    response_df = pd.read_json(response)
 
-    return response_df[0][0]
+    with open("response.json", "w") as f:
+        json.dump(response, f)
+
+    data = ''
+    with open('./response.json', 'r') as f:
+        data = json.load(f)
+
+    response_df = pd.read_json(data, lines=True)
+
+    # return the answer with the highest score
+    return response_df.loc[response_df['score'].idxmax()]['answer']
