@@ -1,12 +1,13 @@
 .vscode
 .venv
 .env
+.next
 
 data_acquisition/__pycache__
-
 
 # Testing
 test
 data_pool/article.txt
 data_pool/articles.csv
 data_pool/articles.txt
+INLPT_data/

@@ -1,1 +1,26 @@
+# Getting Started with FastAPI and Uvicorn
 
+This project was done with [FastApi](https://fastapi.tiangolo.com/tutorial/) and [Uvicorn](https://www.uvicorn.org/).
+
+## Step 1: Installation
+
+In the project directory, you can run:
+
+1. `pip install fastapi`
+2. `pip install uvicorn`
+
+## Step 2: Deployment
+
+To run the backend server we need to use Uvicorn for that to instantiate the required REST API.
+
+`uvicorn main:app --reload` which normally will run on port 8000
+
+for specific port you can use the following:
+
+`uvicorn main:app --reload --port:5000`
+
+The server will reload if you make edits.
+
+## Learn More
+
+You can learn more please refer to [FastAPI](https://fastapi.tiangolo.com/reference/) & [Uvicorn](https://www.uvicorn.org/deployment/).
