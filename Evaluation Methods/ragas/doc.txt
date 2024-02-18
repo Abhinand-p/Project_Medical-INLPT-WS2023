@@ -1,2 +1,0 @@
-Ragas Doc: https://docs.ragas.io/en/v0.1.0/index.html
-How to create testset: https://docs.ragas.io/en/v0.1.0/concepts/testset_generation.html
