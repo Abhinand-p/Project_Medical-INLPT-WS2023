@@ -440,3 +440,16 @@ GET /recipes/_search
         }
     }
 }
+
+/////////////////////////////////////
+
+PUT /med_e5_recursivechar
+{
+    "settings": {
+        "index": {
+            "refresh_interval": -1,
+            "knn": true,
+            "knn.algo_param.ef_search": 512
+        }
+    }
+}
