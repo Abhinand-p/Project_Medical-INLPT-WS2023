@@ -67,6 +67,9 @@ def get_answer_3(question: str= Body(..., embed=True)):
   3. Create the prompt, put together context (abstract_text), prompt command (SystemMessage) and User query (HumanMessage)
   4. Query prompt to LLM and return the answer
   """
+  # First thing is to use Query Transformation to create better queries from the LLM
+  
+  
   embedded_question = embedding_model.encode(question).tolist()
 
   knn_search_body = {
