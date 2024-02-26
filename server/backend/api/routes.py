@@ -109,6 +109,40 @@ def get_answer_3(question: str= Body(..., embed=True), retrieval_strategy:str= B
     }
 
     response = client.search(index="index", body=text_search_body)
+  
+  elif retrieval_strategy == "Hybrid Search":
+    
+    route = f"/{index}/_search?search_pipeline=nlp_search-pipeline"
+    hybrid_search_body = {
+      "_source": {
+        "exclude": [
+          "vector"
+        ]
+      },
+      "query": {
+        "hybrid": {
+          "queries": [
+            {
+              "match": {
+                "text": {
+                  "query": question
+                }
+              }
+            },
+            {
+              "knn": {                 
+                "vector": {
+                  "vector": embedding,
+                  "k": 5
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+
+    response  = client.transport.perform_request(method = "GET", url = route, body = hybrid_search_body) 
 
   # Extract the relevant information from the response
   context = ""
