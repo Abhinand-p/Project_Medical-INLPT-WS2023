@@ -7,10 +7,18 @@ from langchain.schema import (
     SystemMessage,
     HumanMessage,
 )
+import voyageai
+import openai
 router = APIRouter()
 
-#DOWNLOAD embedding model
-embedding_model = SentenceTransformer('intfloat/e5-large-v2')
+#####################EMBEDDING###########################
+chat = ChatOpenAI(
+    openai_api_key= "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",
+    model='gpt-3.5-turbo'
+)
+
+voyageai.api_key =  "pa-3xpcuUhVVgmOQPDBiG7ObYUA58rGn1eB1ZMaowr5xy0" 
+vo = voyageai.Client()
 
 #Initialize connection to opensearch
 host = 'localhost'
@@ -27,12 +35,9 @@ client = OpenSearch(
 #check status
 print(client.info())
 
-#openai config
-
-chat = ChatOpenAI(
-    openai_api_key= "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",
-    model='gpt-3.5-turbo'
-)
+llm_list = ["GPT 3.5 Turbo 0125", "LLAMA-2-7b-chat-hf"]
+index_list = ["voyage-2-large", "text-embedding-3-large"]
+retrieval_list = ["Dense Retrieval", "Sparse Retrieval" "Hybrid Search"]
 
 @router.post("/healthcheck")
 async def mirror(text: str = Body(..., embed= True)):
@@ -57,34 +62,53 @@ def getIndices():
 
   return filtered_list1
 
-# IR: Local openSearch
-# LLM: Cloud GPT 3.5 Turbo
-@router.post("/get-answer-from-local-openSearch")
-def get_answer_3(question: str= Body(..., embed=True)):
-  """ Workflow:
-  1. Embedd question which is the question attribute
-  2. Query most relevant abstract from open Search
-  3. Create the prompt, put together context (abstract_text), prompt command (SystemMessage) and User query (HumanMessage)
-  4. Query prompt to LLM and return the answer
-  """
-  # First thing is to use Query Transformation to create better queries from the LLM
-  
-  
-  embedded_question = embedding_model.encode(question).tolist()
 
-  knn_search_body = {
-    "size": 5,  # Number of nearest neighbors to retrieve
-    "query": {
-        "knn": {
-            "vector": {
-                "vector": embedded_question,
-                "k": 3  # Number of nearest neighbors to retrieve
-                }
+@router.post("/get-answer-from-local-openSearch")
+def get_answer_3(question: str= Body(..., embed=True), retrieval_strategy:str= Body(..., embed=True), 
+                 index:str= Body(..., embed=True),llm:str= Body(..., embed=True)):
+
+  
+  #Select correct embedding
+  if index == "voyage-2-large":
+    embedding =  vo.embed(question, model="voyage-large-2", input_type="document").embeddings
+  elif index == "text-embedding-3-large":
+    response = openai.Embedding.create(
+        engine="text-embedding-3-large",
+        input=question,
+        dimensions = 1024
+    )
+    embedding = response["data"]["embedding"]
+
+  
+  
+  #Select correct retrieval strategy
+  if retrieval_strategy == "Dense Retrieval":
+    knn_search_body = {
+      "size": 5,  # Number of nearest neighbors to retrieve
+      "query": {
+          "knn": {
+              "vector": {
+                  "vector": embedding,
+                  "k": 3  # Number of nearest neighbors to retrieve
+                  }
+              }
             }
           }
-        }
-  # Execute the search
-  response = client.search(index="med_data", body=knn_search_body)
+    # Execute the search
+    response = client.search(index="index", body=knn_search_body)
+
+  elif retrieval_strategy == "Sparse Retrieval":
+    text_search_body = {
+      "size": 53, 
+      "explain": True,
+      "query": {
+          "match": {
+              "text": question  
+          }
+      }
+    }
+
+    response = client.search(index="index", body=text_search_body)
 
   # Extract the relevant information from the response
   context = ""
