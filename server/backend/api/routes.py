@@ -10,11 +10,47 @@ from langchain.schema import (
 import voyageai
 import openai
 router = APIRouter()
+from torch import bfloat16 
+import transformers
+from transformers import LlamaTokenizer
+import os
+from langchain.llms import HuggingFacePipeline 
+
+##################LLM#######################
+model_id = 'meta-llama/Llama-2-7b-chat-hf' #'HuggingFaceH4/zephyr-7b-alpha' 
+hf_auth = '...' 
+os.environ['OPENAI_API_KEY'] = "..."
+
+bnb_config = transformers.BitsAndBytesConfig( load_in_4bit=True, 
+                                             bnb_4bit_quant_type='nf4',
+                                             bnb_4bit_use_double_quant=True, 
+                                             bnb_4bit_compute_dtype=bfloat16 ) # begin initializing HF items, need auth token for these 
+
+model_config = transformers.AutoConfig.from_pretrained( model_id, token=hf_auth )
+
+model = transformers.AutoModelForCausalLM.from_pretrained(model_id, 
+                                                          trust_remote_code=True,
+                                                          config=model_config,
+                                                          quantization_config=bnb_config,
+                                                          device_map="auto",
+                                                          token=hf_auth ) 
+
+tokenizer = LlamaTokenizer.from_pretrained("meta-llama/Llama-2-13b-chat-hf",token=hf_auth)
+
+generate_text = transformers.pipeline( model=model, tokenizer=tokenizer,
+                                      return_full_text=True, # langchain expects the full text
+                                      task='text-generation', # we pass model parameters here too 
+                                      max_new_tokens=512,
+                                      repetition_penalty=1.1, # without this output begins repeating
+                                      use_cache=True,
+                                     )
+
+llama2_7b = HuggingFacePipeline(pipeline=generate_text)
 
 #####################EMBEDDING###########################
 chat = ChatOpenAI(
     openai_api_key= "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",
-    model='gpt-3.5-turbo'
+    model='gpt-3.5-turbo-0125'
 )
 
 voyageai.api_key =  "pa-3xpcuUhVVgmOQPDBiG7ObYUA58rGn1eB1ZMaowr5xy0" 
@@ -152,21 +188,29 @@ def get_answer_3(question: str= Body(..., embed=True), retrieval_strategy:str= B
     context = context + f"""Chunk {id}: {source['text'][0]}"""
     print(f"Score: {hit['_score']}, Text: {source['text']}")
 
-  #Use GPT 3.5 Turbo to generate the answer
-  messages = [
-    SystemMessage(content="You are a friendly assistant that will answer questions"),
-    ]
+  #Select correct LLM
+  if llm == "GPT 3.5 Turbo 0125":
+    messages = [
+      SystemMessage(content="You are a friendly assistant that will answer questions"),
+      ]
 
-  augmented_prompt = f"""Try to to answer the question with the Chunks. The the chunks dont provide information to answer explictily say so. Answer the question with your own knowledge.
-  Contexts:
-  {context}
-  Query: {question}"""
-  prompt = HumanMessage(
-    content=augmented_prompt
-  )
-  messages.append(prompt)
-  res = chat(messages)
+    augmented_prompt = f"""Try to to answer the question with the Chunks. If the chunks dont provide information to answer explictily say so and answer the question with your own knowledge.
+    Contexts:
+    {context}
+    Query: {question}"""
+    prompt = HumanMessage(
+      content=augmented_prompt
+    )
+    messages.append(prompt)
+    res = chat(messages)
+    res = res.content
+  elif llm ==  "LLAMA-2-7b-chat-hf":
+    prompt = f"""Try to to answer the question with the Chunks. If the chunks dont provide information to answer explictily say so and answer the question with your own knowledge.
+    Contexts:
+    {context}
+    Query: {question}"""
+    res = llama2_7b(prompt)
 
-  return res.content
+  return res
 
 
