@@ -2,7 +2,7 @@ from opensearchpy import OpenSearch
 from fastapi import Body, APIRouter
 from sentence_transformers import SentenceTransformer
 #from .model import get_data
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, OpenAI
 from langchain.schema import (
     SystemMessage,
     HumanMessage,
@@ -15,11 +15,12 @@ import transformers
 from transformers import LlamaTokenizer
 import os
 from langchain.llms import HuggingFacePipeline 
+from openai import OpenAI
 
 ##################LLM#######################
 model_id = 'meta-llama/Llama-2-7b-chat-hf' #'HuggingFaceH4/zephyr-7b-alpha' 
-hf_auth = '...' 
-os.environ['OPENAI_API_KEY'] = "..."
+hf_auth = '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' 
+os.environ['OPENAI_API_KEY'] = "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"
 
 bnb_config = transformers.BitsAndBytesConfig( load_in_4bit=True, 
                                              bnb_4bit_quant_type='nf4',
@@ -47,11 +48,13 @@ generate_text = transformers.pipeline( model=model, tokenizer=tokenizer,
 
 llama2_7b = HuggingFacePipeline(pipeline=generate_text)
 
-#####################EMBEDDING###########################
 chat = ChatOpenAI(
-    openai_api_key= "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",
+    openai_api_key= "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",
     model='gpt-3.5-turbo-0125'
 )
+
+#####################EMBEDDING###########################
+openAIClient = OpenAI()
 
 voyageai.api_key =  "pa-3xpcuUhVVgmOQPDBiG7ObYUA58rGn1eB1ZMaowr5xy0" 
 vo = voyageai.Client()
@@ -73,7 +76,7 @@ print(client.info())
 
 llm_list = ["GPT 3.5 Turbo 0125", "LLAMA-2-7b-chat-hf"]
 index_list = ["voyage-2-large", "text-embedding-3-large"]
-retrieval_list = ["Dense Retrieval", "Sparse Retrieval" "Hybrid Search"]
+retrieval_list = ["Dense Retrieval", "Sparse Retrieval", "Hybrid Search"]
 
 @router.post("/healthcheck")
 async def mirror(text: str = Body(..., embed= True)):
@@ -81,12 +84,8 @@ async def mirror(text: str = Body(..., embed= True)):
 
 @router.get("/getOpenSearchIndices")
 def getIndices():
-  filterOut = [".kibana_1",".opendistro_security","security-auditlog-2024.02.17",
-               ".opensearch-observability", ".plugins-ml-config", "security-auditlog-2024.02.25",
-               ".opensearch-sap-log-types-config",
-               "security-auditlog-2024.02.19",
-               "wmt_voyage-large-2-paragraph",
-               "security-auditlog-2024.02.18"]
+  filterOut = [".plugins-ml-config",".opensearch-observability",".opensearch-sap-log-types-config",
+               ".opendistro_security"]
   
   res = client.indices.get_alias().keys()
   indices = []
@@ -98,22 +97,33 @@ def getIndices():
 
   return filtered_list1
 
+@router.get("/getLLMs")
+def getLLM():
+  return llm_list
 
-@router.post("/get-answer-from-local-openSearch")
-def get_answer_3(question: str= Body(..., embed=True), retrieval_strategy:str= Body(..., embed=True), 
-                 index:str= Body(..., embed=True),llm:str= Body(..., embed=True)):
+@router.get("/getRetrievalStrategy")
+def getRetrieval():
+  return retrieval_list
+
+
+@router.post("/pipeline")
+def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_strategy:str= Body(..., embed=True), 
+                 index:str= Body(..., embed=True),llm:str= Body(..., embed=True), citation:str= Body(..., embed=True)):
 
   
   #Select correct embedding
-  if index == "voyage-2-large":
-    embedding =  vo.embed(question, model="voyage-large-2", input_type="document").embeddings
-  elif index == "text-embedding-3-large":
-    response = openai.Embedding.create(
-        engine="text-embedding-3-large",
-        input=question,
-        dimensions = 1024
-    )
-    embedding = response["data"]["embedding"]
+  if retrieval_strategy != "Sparse Retrieval" : 
+    if index == "voyage-2-large":
+      embedding =  vo.embed(question, model="voyage-large-2", input_type="document").embeddings[0]
+      print("---------------------------voyage-2-large:", embedding)
+    elif index == "text-embedding-3-large":
+      response = openAIClient.embeddings.create(
+          model="text-embedding-3-large",
+          input=question,
+          dimensions = 1024
+      )
+      embedding = response.data[0].embedding
+      print("---------------------------text-embedding-3-large:", embedding)
 
   
   
@@ -131,12 +141,10 @@ def get_answer_3(question: str= Body(..., embed=True), retrieval_strategy:str= B
             }
           }
     # Execute the search
-    response = client.search(index="index", body=knn_search_body)
+    response = client.search(index=index, body=knn_search_body)
 
   elif retrieval_strategy == "Sparse Retrieval":
     text_search_body = {
-      "size": 53, 
-      "explain": True,
       "query": {
           "match": {
               "text": question  
@@ -144,9 +152,10 @@ def get_answer_3(question: str= Body(..., embed=True), retrieval_strategy:str= B
       }
     }
 
-    response = client.search(index="index", body=text_search_body)
+    response = client.search(index=index, body=text_search_body)
   
   elif retrieval_strategy == "Hybrid Search":
+    print("######HYBRIDHYBRIDHYBRID")
     
     route = f"/{index}/_search?search_pipeline=nlp_search-pipeline"
     hybrid_search_body = {
@@ -182,10 +191,11 @@ def get_answer_3(question: str= Body(..., embed=True), retrieval_strategy:str= B
 
   # Extract the relevant information from the response
   context = ""
+  cite = ""
   hits = response['hits']['hits']
-  for id, hit in enumerate(hits): # fixing the id from built-in to retrieve it back from the enumerate
+  for id, hit in enumerate(hits[:3]): # fixing the id from built-in to retrieve it back from the enumerate
     source = hit['_source']
-    context = context + f"""Chunk {id}: {source['text'][0]}"""
+    context = context + f"""Chunk {id}: {source['text']}"""
     print(f"Score: {hit['_score']}, Text: {source['text']}")
 
   #Select correct LLM
@@ -194,7 +204,7 @@ def get_answer_3(question: str= Body(..., embed=True), retrieval_strategy:str= B
       SystemMessage(content="You are a friendly assistant that will answer questions"),
       ]
 
-    augmented_prompt = f"""Try to to answer the question with the Chunks. If the chunks dont provide information to answer explictily say so and answer the question with your own knowledge.
+    augmented_prompt = f"""Try to to answer the question with the Chunks. Dont say you tok the information from the chunks unless they dont provide information to answer, in that case explictily say so and answer the question with your own knowledge.
     Contexts:
     {context}
     Query: {question}"""
@@ -205,12 +215,16 @@ def get_answer_3(question: str= Body(..., embed=True), retrieval_strategy:str= B
     res = chat(messages)
     res = res.content
   elif llm ==  "LLAMA-2-7b-chat-hf":
+    print("### LLAMA 2 Answer:")
     prompt = f"""Try to to answer the question with the Chunks. If the chunks dont provide information to answer explictily say so and answer the question with your own knowledge.
     Contexts:
     {context}
     Query: {question}"""
     res = llama2_7b(prompt)
 
-  return res
+  if citation == "true":
+    cite = f" (Citation:{response['hits']['hits'][0]['_source']['cite']})"
+
+  return f"{res} \n \n {cite}"
 
 
