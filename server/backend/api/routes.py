@@ -1,151 +1,60 @@
-from typing import Union
 from opensearchpy import OpenSearch
-from fastapi import Body, APIRouter, HTTPException
-#from api import db_manager
-from faunadb import query as q
-from faunadb.client import FaunaClient
-from api import pineconeClient
+from fastapi import Body, APIRouter
 from sentence_transformers import SentenceTransformer
-import os
-from .model import get_data
-from langchain.chat_models import ChatOpenAI
+#from .model import get_data
+from langchain_openai import ChatOpenAI
 from langchain.schema import (
     SystemMessage,
     HumanMessage,
-    AIMessage
 )
+import voyageai
+import openai
 router = APIRouter()
+from torch import bfloat16 
+import transformers
+from transformers import LlamaTokenizer
+import os
+from langchain.llms import HuggingFacePipeline 
 
+##################LLM#######################
+model_id = 'meta-llama/Llama-2-7b-chat-hf' #'HuggingFaceH4/zephyr-7b-alpha' 
+hf_auth = '...' 
+os.environ['OPENAI_API_KEY'] = "..."
 
-# @router.get('')
-# async def get_text(lang: str, section: str, key: str):
-# return await dm_manager.get_language(lang, section, key)
+bnb_config = transformers.BitsAndBytesConfig( load_in_4bit=True, 
+                                             bnb_4bit_quant_type='nf4',
+                                             bnb_4bit_use_double_quant=True, 
+                                             bnb_4bit_compute_dtype=bfloat16 ) # begin initializing HF items, need auth token for these 
 
+model_config = transformers.AutoConfig.from_pretrained( model_id, token=hf_auth )
 
-# @router.post('', status_code=201)
-# async def set_text(lang: str, section: str, key: str, value: str):
-#    return await dm_manager.set_language(lang, section, key, value)
+model = transformers.AutoModelForCausalLM.from_pretrained(model_id, 
+                                                          trust_remote_code=True,
+                                                          config=model_config,
+                                                          quantization_config=bnb_config,
+                                                          device_map="auto",
+                                                          token=hf_auth ) 
 
-#DOWNLOAD embedding model
-embedding_model = SentenceTransformer('intfloat/e5-large-v2')
+tokenizer = LlamaTokenizer.from_pretrained("meta-llama/Llama-2-13b-chat-hf",token=hf_auth)
 
-#Initialize FaunaDB
-client = FaunaClient(
-  secret="fnAFXCXwtRAAzbZaH3YURuEnoGu7Np6vhjhnl5Tp",
-)
+generate_text = transformers.pipeline( model=model, tokenizer=tokenizer,
+                                      return_full_text=True, # langchain expects the full text
+                                      task='text-generation', # we pass model parameters here too 
+                                      max_new_tokens=512,
+                                      repetition_penalty=1.1, # without this output begins repeating
+                                      use_cache=True,
+                                     )
 
-#Initialize pinecone manager
-pineconeOps = pineconeClient.PineconeOperations()
+llama2_7b = HuggingFacePipeline(pipeline=generate_text)
 
-@router.post("/healthcheck")
-async def mirror(text: str = Body(..., embed= True)):
-  return text
-
-"""0. Attempt for prototype: Azure Endpoint approach"""
-
-# Embedding model: Local intfloat/e5-large-v2
-# IR: Cloud Pinecone + FaunaDB
-# LLM: Cloud biobert-pubmed-qa
-@router.post("/get-answer-from-model")
-def get_answer_1(question: str= Body(..., embed=True)):
-  """ Workflow:
-  1. Embedd question which is the text attribute
-  2. Query most relevant abstract with Pinecone + FaunaDB
-  3. Create the prompt, put together context (abstract_text), prompt command (SystemMessage) and User query (HumanMessage)
-  4. Query prompt to LLM and return the answer
-  """
-  # 1. Embedding the retrieved question from frontend
-  embedded_question = embedding_model.encode(question).tolist()
-  # 2. Query most relevant abstract with Pinecone
-  abstracts = pineconeOps.query(query_vector=embedded_question)
-  context = ""
-  check_prompt_size = 0
-  #Query metadata of top 3 chunks, check if returned chunks exceed input limit or not
-  def queryMetaData(abstractId, check_prompt_size):
-    abstract_data = client.query(q.paginate(q.match(q.index("metadata"), abstractId)))
-    chunk_with_local_context = abstract_data["data"][0][1] + abstract_data["data"][0][0] +abstract_data["data"][0][2]
-    check_prompt_size += len(chunk_with_local_context.split())
-    if(check_prompt_size < model_max_input + len(question.split())):
-      return (chunk_with_local_context,check_prompt_size )
-    else:
-      print("Prompt exceeded models max input size!")
-      return "","" # in case of prompt size exceeded, return empty string
-
-  for id, abstract in enumerate(abstracts["matches"]):
-    data = queryMetaData(abstract["id"],check_prompt_size)
-    check_prompt_size += data[1]
-    print(check_prompt_size)
-
-    context = context + f"""Chunk {id}: {data[0]}"""
-
-  print(context)
-  res = get_data(question, context)
-
-  return res
-
-"""1. Attempt for prototype: local approach"""
-
+#####################EMBEDDING###########################
 chat = ChatOpenAI(
-    openai_api_key= "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",
-    model='gpt-3.5-turbo'
+    openai_api_key= "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",
+    model='gpt-3.5-turbo-0125'
 )
-model_max_input = 4096
 
-# Embedding model: Local intfloat/e5-large-v2
-# IR: Cloud Pinecone + FaunaDB
-# LLM: Cloud GPT 3.5 Turbo
-@router.post("/get-answer-from-local")
-def get_answer_2(question: str= Body(..., embed=True)):
-  """ Workflow:
-  1. Embedd question which is the question attribute
-  2. Query most relevant abstract with Pinecone + FaunaDB
-  3. Create the prompt, put together context (abstract_text), prompt command (SystemMessage) and User query (HumanMessage)
-  4. Query prompt to LLM and return the answer
-  """
-  embedded_question = embedding_model.encode(question).tolist()
-  abstracts = pineconeOps.query(query_vector=embedded_question)
-  context = ""
-  check_prompt_size = 0
-  #Query metadata of top 3 chunks, check if returned chunks exceed input limit or not
-  def queryMetaData(abstractId, check_prompt_size):
-    abstract_data = client.query(
-    q.paginate(q.match(q.index("metadata"), abstractId)))
-    chunk_with_local_context = abstract_data["data"][0][1] + abstract_data["data"][0][0] +abstract_data["data"][0][2]
-    check_prompt_size += len(chunk_with_local_context.split())
-    if(check_prompt_size < model_max_input + len(question.split())):
-      return (chunk_with_local_context,check_prompt_size )
-    else:
-      print("Prompt exceeded models max input size!")
-      return ""
-
-  # check if returned chunks exceed input limit or not
-  for id, abstract in enumerate(abstracts["matches"]):
-    data = queryMetaData(abstract["id"],check_prompt_size)
-    check_prompt_size += data[1]
-
-    context = context + f"""Chunk {id}: {data[0]}"""
-
-  print(context)
-
-  #Use GPT 3.5 Turbo to generate the answer
-  messages = [
-    SystemMessage(content="You are a friendly assistant that will answer questions"),
-    ]
-
-  augmented_prompt = f"""Try to to answer the question with the Chunks. The the chunks dont provide information to answer explictily say so. Answer the question with your own knowledge.
-  Contexts:
-  {context}
-  Query: {question}"""
-  prompt = HumanMessage(
-    content=augmented_prompt
-  )
-  messages.append(prompt)
-  res = chat(messages)
-
-  return res.content
-
-
-"""2. Attempt for prototype: local approach"""
+voyageai.api_key =  "pa-3xpcuUhVVgmOQPDBiG7ObYUA58rGn1eB1ZMaowr5xy0" 
+vo = voyageai.Client()
 
 #Initialize connection to opensearch
 host = 'localhost'
@@ -162,35 +71,114 @@ client = OpenSearch(
 #check status
 print(client.info())
 
-# Embedding model: Local intfloat/e5-large-v2
-# IR: Local openSearch
-# LLM: Cloud GPT 3.5 Turbo
-@router.post("/get-answer-from-local-openSearch")
-def get_answer_3(question: str= Body(..., embed=True)):
-  """ Workflow:
-  1. Embedd question which is the question attribute
-  2. Query most relevant abstract from open Search
-  3. Create the prompt, put together context (abstract_text), prompt command (SystemMessage) and User query (HumanMessage)
-  4. Query prompt to LLM and return the answer
-  """
-  # First thing is to use Query Transformation to create better queries from the LLM
-  
-  
-  embedded_question = embedding_model.encode(question).tolist()
+llm_list = ["GPT 3.5 Turbo 0125", "LLAMA-2-7b-chat-hf"]
+index_list = ["voyage-2-large", "text-embedding-3-large"]
+retrieval_list = ["Dense Retrieval", "Sparse Retrieval" "Hybrid Search"]
 
-  knn_search_body = {
-    "size": 5,  # Number of nearest neighbors to retrieve
-    "query": {
-        "knn": {
-            "vector": {
-                "vector": embedded_question,
-                "k": 3  # Number of nearest neighbors to retrieve
-                }
+@router.post("/healthcheck")
+async def mirror(text: str = Body(..., embed= True)):
+  return text
+
+@router.get("/getOpenSearchIndices")
+def getIndices():
+  filterOut = [".kibana_1",".opendistro_security","security-auditlog-2024.02.17",
+               ".opensearch-observability", ".plugins-ml-config", "security-auditlog-2024.02.25",
+               ".opensearch-sap-log-types-config",
+               "security-auditlog-2024.02.19",
+               "wmt_voyage-large-2-paragraph",
+               "security-auditlog-2024.02.18"]
+  
+  res = client.indices.get_alias().keys()
+  indices = []
+  for index in res:
+    indices.append(index)
+
+  set2 = set(filterOut)
+  filtered_list1 = [item for item in indices if item not in set2]
+
+  return filtered_list1
+
+
+@router.post("/get-answer-from-local-openSearch")
+def get_answer_3(question: str= Body(..., embed=True), retrieval_strategy:str= Body(..., embed=True), 
+                 index:str= Body(..., embed=True),llm:str= Body(..., embed=True)):
+
+  
+  #Select correct embedding
+  if index == "voyage-2-large":
+    embedding =  vo.embed(question, model="voyage-large-2", input_type="document").embeddings
+  elif index == "text-embedding-3-large":
+    response = openai.Embedding.create(
+        engine="text-embedding-3-large",
+        input=question,
+        dimensions = 1024
+    )
+    embedding = response["data"]["embedding"]
+
+  
+  
+  #Select correct retrieval strategy
+  if retrieval_strategy == "Dense Retrieval":
+    knn_search_body = {
+      "size": 5,  # Number of nearest neighbors to retrieve
+      "query": {
+          "knn": {
+              "vector": {
+                  "vector": embedding,
+                  "k": 3  # Number of nearest neighbors to retrieve
+                  }
+              }
             }
           }
+    # Execute the search
+    response = client.search(index="index", body=knn_search_body)
+
+  elif retrieval_strategy == "Sparse Retrieval":
+    text_search_body = {
+      "size": 53, 
+      "explain": True,
+      "query": {
+          "match": {
+              "text": question  
+          }
+      }
+    }
+
+    response = client.search(index="index", body=text_search_body)
+  
+  elif retrieval_strategy == "Hybrid Search":
+    
+    route = f"/{index}/_search?search_pipeline=nlp_search-pipeline"
+    hybrid_search_body = {
+      "_source": {
+        "exclude": [
+          "vector"
+        ]
+      },
+      "query": {
+        "hybrid": {
+          "queries": [
+            {
+              "match": {
+                "text": {
+                  "query": question
+                }
+              }
+            },
+            {
+              "knn": {                 
+                "vector": {
+                  "vector": embedding,
+                  "k": 5
+                }
+              }
+            }
+          ]
         }
-  # Execute the search
-  response = client.search(index="med_data", body=knn_search_body)
+      }
+    }
+
+    response  = client.transport.perform_request(method = "GET", url = route, body = hybrid_search_body) 
 
   # Extract the relevant information from the response
   context = ""
@@ -200,21 +188,29 @@ def get_answer_3(question: str= Body(..., embed=True)):
     context = context + f"""Chunk {id}: {source['text'][0]}"""
     print(f"Score: {hit['_score']}, Text: {source['text']}")
 
-  #Use GPT 3.5 Turbo to generate the answer
-  messages = [
-    SystemMessage(content="You are a friendly assistant that will answer questions"),
-    ]
+  #Select correct LLM
+  if llm == "GPT 3.5 Turbo 0125":
+    messages = [
+      SystemMessage(content="You are a friendly assistant that will answer questions"),
+      ]
 
-  augmented_prompt = f"""Try to to answer the question with the Chunks. The the chunks dont provide information to answer explictily say so. Answer the question with your own knowledge.
-  Contexts:
-  {context}
-  Query: {question}"""
-  prompt = HumanMessage(
-    content=augmented_prompt
-  )
-  messages.append(prompt)
-  res = chat(messages)
+    augmented_prompt = f"""Try to to answer the question with the Chunks. If the chunks dont provide information to answer explictily say so and answer the question with your own knowledge.
+    Contexts:
+    {context}
+    Query: {question}"""
+    prompt = HumanMessage(
+      content=augmented_prompt
+    )
+    messages.append(prompt)
+    res = chat(messages)
+    res = res.content
+  elif llm ==  "LLAMA-2-7b-chat-hf":
+    prompt = f"""Try to to answer the question with the Chunks. If the chunks dont provide information to answer explictily say so and answer the question with your own knowledge.
+    Contexts:
+    {context}
+    Query: {question}"""
+    res = llama2_7b(prompt)
 
-  return res.content
+  return res
 
 

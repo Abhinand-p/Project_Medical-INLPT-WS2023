@@ -94,6 +94,13 @@ const Wrapper = () => {
                 </ListItemButton>
               </ListItem>
             </Link>
+            <Link href="/settings" style={{ textDecoration: "none" }}>
+              <ListItem>
+                <ListItemButton>
+                  <ListItemIcon>Settings</ListItemIcon>
+                </ListItemButton>
+              </ListItem>
+            </Link>
             <Link href="/about" style={{ textDecoration: "none" }}>
               <ListItem>
                 <ListItemButton>
