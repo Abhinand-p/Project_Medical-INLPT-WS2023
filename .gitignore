@@ -3,7 +3,6 @@
 .env
 .next
 
-
 data_acquisition/__pycache__
 
 test
@@ -12,3 +11,4 @@ data_pool/articles.csv
 data_pool/articles.txt
 INLPT_data/
 venv/
+Retrieval/Embedding/strategy-4/med_e5-base-v2_recursiveCharacterSplitter.csv
