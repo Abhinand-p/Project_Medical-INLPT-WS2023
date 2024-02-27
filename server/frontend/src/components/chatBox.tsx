@@ -7,10 +7,14 @@ import {
   ListItem,
   ListItemText,
   Typography,
+  Tooltip,
+  IconButton,
+  TooltipProps,
+  tooltipClasses,
 } from "@mui/material";
 import { Slider, FormControlLabel, Switch } from '@mui/material';
-import { padding } from "@mui/system";
-
+import { padding, styled } from "@mui/system";
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 type MessageType = {
   text: string;
   type: "user" | "assistant";
@@ -18,9 +22,13 @@ type MessageType = {
 
 const MAX_CHARACTERS = 4000;
 
-interface CitationSliderProps {
-  label: string;
-}
+const CustomWidthTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} classes={{ popper: className }} />
+))({
+  [`& .${tooltipClasses.tooltip}`]: {
+    maxWidth: 200,
+  },
+});
 
 const ChatComponent: React.FC = () => {
   const [messages, setMessages] = useState<MessageType[]>([]);
@@ -28,10 +36,10 @@ const ChatComponent: React.FC = () => {
 
 //These are so that the selected option in dropdown stays mounted
 // These are send to backend to configure pipeline
-  const [llms, setllms] = useState<string>('');
-  const [retrievalStrategies, setRetrievalStrategies] = useState<string>('');
+  const [llms, setllms] = useState<string>('GPT 3.5 Turbo 0125');
+  const [retrievalStrategies, setRetrievalStrategies] = useState<string>('Hybrid Search');
   const [disableSelectIndex, setDisableSelectIndex] = useState<boolean>(false);
-  const [openSearchIndices, setOpenSearchIndices] = useState<string>('');
+  const [openSearchIndices, setOpenSearchIndices] = useState<string>('voyage-2-large');
 
 //These are to catch the currently selected dropdown choice
   const handleDropDownChange_llm = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -54,8 +62,27 @@ const ChatComponent: React.FC = () => {
   const [retrievalStrategies_list, setRetrievalStrategies_list] = useState<[]>([]);
   const [openSearchIndices_list, setOpenSearchIndices_list] = useState<[]>([]);
 
-  // Fr citation slider
-  const [citationActive, setCitationActive] = useState(false);
+  // For citation slider
+  const [citationActive, setCitationActive] = useState(true);
+
+  // Function to toggle visibility of advanced mode
+  const [showBox, setShowBox] = useState(false); // Initial state: hidden
+  
+  const AdvancedMode = () => {
+    //When Advanced mode is activated remove default values, if deactivated 
+    if(showBox == false){
+      setOpenSearchIndices("")
+      setRetrievalStrategies("")
+      setllms("")
+    }
+    if(showBox == true){
+      setOpenSearchIndices("voyage-2-large")
+      setRetrievalStrategies("Hybrid Search")
+      setllms("GPT 3.5 Turbo 0125")
+    }
+    
+    setShowBox(!showBox);
+  };
 
 // Query available pipeline config when page loads for the first time
   useEffect(() => {
@@ -126,11 +153,16 @@ const ChatComponent: React.FC = () => {
   });
 
   const checkInput = () => {
-    if (newMessage.trim() != "") {
-      handleSendMessage();
-    } else {
+    if (newMessage.trim() == "") {
       alert("Message can't be empty!");
+      return
     }
+    if(openSearchIndices == "" || retrievalStrategies == "" || llms == "" ){
+      alert("Complete the Configuration!");
+      return
+    }
+    handleSendMessage();
+    
   };
 
   async function handleSendMessage() {
@@ -164,10 +196,11 @@ const ChatComponent: React.FC = () => {
         width: "50%",
         position: "absolute",
         top: "50%",
-        left: "40%",
+        left: "45%",
         transform: "translate(-50%, -50%)",
         border: "1px solid gray",
         borderRadius: "10px",
+        marginBottom: "20px"
       }}
     >
       <Box sx={{ overflow: "auto", flexGrow: 1 }}>
@@ -228,7 +261,25 @@ const ChatComponent: React.FC = () => {
           Send
         </Button>
       </Box>
+      
     </Box>
+    <Box sx={{
+              display: "flex",
+              flexDirection: "column",
+              height: "50%",
+              width: "8%",
+              position: "absolute",
+              top: "100%",
+              left: "24%",
+              transform: "translate(-50%, -50%)",
+              marginTop: "10px"
+            }}
+        >
+        <button onClick = {AdvancedMode}>
+          Advanced Mode: {showBox ? 'On' : 'Off'}
+        </button>
+      </Box>
+    {showBox && (
     <Box sx={{
         display: "flex",
         flexDirection: "column",
@@ -236,7 +287,7 @@ const ChatComponent: React.FC = () => {
         width: "20%",
         position: "absolute",
         top: "50%",
-        left: "75%",
+        left: "80%",
         transform: "translate(-50%, -50%)",
         border: "1px solid gray",
         borderRadius: "10px",
@@ -287,10 +338,19 @@ const ChatComponent: React.FC = () => {
         label= "Citation Mode"
       />
     </div>
+    <Box sx={{ paddingLeft: "5px" }}>
+      <CustomWidthTooltip   arrow placement="right-start" title="Please Configure your pipeline. The suggested default Configration is Hybrid Search with Voyage-2-large 
+      and GPT 3.5 Turbo 0125 for Generation">
+        <IconButton>
+          <HelpOutlineIcon />
+        </IconButton>
+      </CustomWidthTooltip >
+    </Box>
+    
 
 
   
-      </Box>
+      </Box>)}
 
       
       </>
