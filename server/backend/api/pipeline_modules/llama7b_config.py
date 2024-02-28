@@ -6,7 +6,7 @@ from langchain.llms import HuggingFacePipeline
 from dotenv import load_dotenv
 from utils import Utils
 
-class llamaManager:
+class LlamaManager:
 
     def __init__(self):
         load_dotenv()

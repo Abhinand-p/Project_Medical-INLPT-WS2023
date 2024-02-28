@@ -8,7 +8,7 @@ from azure.identity import (
     InteractiveBrowserCredential,
 )
 
-class azureManager:
+class AzureManager:
     def __init__(self):
         load_dotenv()
         try:

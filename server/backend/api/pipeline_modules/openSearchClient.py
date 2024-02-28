@@ -2,7 +2,7 @@
 from opensearchpy import OpenSearch
 from utils import Utils
 
-class openSearchManager:
+class OpenSearchManager:
 
     def __init__(self):
         self.utils = Utils()

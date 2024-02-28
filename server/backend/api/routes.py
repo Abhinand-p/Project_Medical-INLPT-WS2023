@@ -6,14 +6,14 @@ router = APIRouter()
 
 # Generation
 gpt3 = chatGPT_config.GPTManager()
-llama7b = llama7b_confiig.llamaManager()
-azure = azure_config.azureManager()
+llama7b = llama7b_confiig.LlamaManager()
+azure = azure_config.AzureManager()
 
 # Retrieval
-openSearch = openSearchCllient.openSearchManager()
+openSearch = openSearchCllient.OpenSearchManager()
 
 # Embedding
-embed = embedding_config.embeddingManager()
+embed = embedding_config.EmbeddingManager()
 
 
 #------------Configuration Options------------

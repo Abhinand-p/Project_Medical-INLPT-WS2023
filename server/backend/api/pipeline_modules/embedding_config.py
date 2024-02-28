@@ -5,7 +5,7 @@ import configparser
 
 #One index corresponds to 1 embedding model
 
-class embeddingManager:
+class EmbeddingManager:
 
     def __init__(self):
         config = configparser.ConfigParser()
