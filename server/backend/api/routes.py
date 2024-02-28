@@ -1,5 +1,5 @@
 from fastapi import Body, APIRouter
-from .pipeline_modules import chatGPT_config, llama7b_confiig, openSearchCllient, embedding_config
+from .pipeline_modules import azure_config, chatGPT_config, llama7b_confiig, openSearchCllient, embedding_config
 router = APIRouter()
 
 #------------Initialize Pipeline Modules------------
@@ -7,6 +7,7 @@ router = APIRouter()
 # Generation
 gpt3 = chatGPT_config.GPTManager()
 llama7b = llama7b_confiig.llamaManager()
+azure = azure_config.azureManager()
 
 # Retrieval
 openSearch = openSearchCllient.openSearchManager()
@@ -16,7 +17,7 @@ embed = embedding_config.embeddingManager()
 
 
 #------------Configuration Options------------
-llm_list = ["GPT 3.5 Turbo 0125", "LLAMA-2-7b-chat-hf"]
+llm_list = ["GPT 3.5 Turbo 0125", "LLAMA-2-7b-chat-hf", "Azure-QA-Conversational"]
 index_list = ["voyage-2-large", "text-embedding-3-large"]
 retrieval_list = ["Dense Retrieval", "Sparse Retrieval", "Hybrid Search"]
 
@@ -53,10 +54,10 @@ def getRetrieval():
 def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_strategy:str= Body(..., embed=True), 
                  index:str= Body(..., embed=True),llm:str= Body(..., embed=True), citation:str= Body(..., embed=True)):
 
-  
+
   #Embed query
   embedded_query = embed.controller(question, retrieval_strategy, index) #Index corresponds to embedding model since we have one index per mbedding model
-  
+
   #Retrieve Data
   context, cite = openSearch.controller(retrieval_strategy, embedded_query, question, index)
 
@@ -66,6 +67,9 @@ def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_str
 
   elif llm == llm_list[1]:
     answer = llama7b.query(question, context)
+    
+  elif llm == llm_list[2]:
+    answer = azure.query(question, context)
 
   # Send Citation 
   if citation == "true":
