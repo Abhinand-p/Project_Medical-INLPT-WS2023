@@ -1,15 +1,16 @@
-import os
+""" This file is responsible for managing the embedding models and their respective functions."""
 from openai  import  OpenAI
 import voyageai
-from dotenv import load_dotenv
+import configparser
 
 #One index corresponds to 1 embedding model
 
 class embeddingManager:
 
-    def __init__(self): 
-        load_dotenv()
-        voyageai.api_key =  "pa-3xpcuUhVVgmOQPDBiG7ObYUA58rGn1eB1ZMaowr5xy0"
+    def __init__(self):
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        voyageai.api_key = config['API_KEY']['VOYAGE_API_KEY']
 
         self.voyageAIClient = voyageai.Client()
 
@@ -22,14 +23,12 @@ class embeddingManager:
         
         if(retrieval_strategy == "Sparse Retrieval"):
             return 
-        if(embedding_model == self.embedding_list[0]):
+        elif(embedding_model == self.embedding_list[0]):
             print("########### Emb Model: voyage-2-large")
             return self.voyage_2_large( question)
-        if(embedding_model == self.embedding_list[1]):
+        elif(embedding_model == self.embedding_list[1]):
             print("########### Emb Model: text-embedding-3-large")
             return self.text_embedding_3_large( question)
-            
-
         return 0
     
 

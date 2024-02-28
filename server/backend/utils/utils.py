@@ -13,9 +13,27 @@ class Utils:
         matches = re.findall(pattern, text)
         return matches
     
-    def save_conversation(self, conversation):
+    def save_conversation(self, conversation, Geneartor = 'GPT'):
         # Save the conversation in a file
-        with open('conversation.pkl', 'wb') as file:
-            pickle.dump(conversation, file)
-        # Dump the data into the file using pickle.dump()
-        return True
+        if Geneartor == 'GPT':
+            with open('GptConversation.pkl', 'wb') as file:
+                pickle.dump(conversation, file)
+            return True
+        elif Geneartor == 'LLAMA':
+            with open('LlamaConversation.pkl', 'wb') as file:
+                pickle.dump(conversation, file)
+            return True
+        else:
+            return False
+        
+    def extract_pmid(self, text):
+        # Regular expression pattern to extract the PMID
+        pattern = r'/(\d+)/?$'
+
+        # Search for the PMID in the URL using the pattern
+        match = re.search(pattern, text)
+
+        if match:
+            return match.group(1)
+        else:
+            return None

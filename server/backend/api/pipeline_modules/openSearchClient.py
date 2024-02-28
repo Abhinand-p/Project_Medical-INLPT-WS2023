@@ -1,9 +1,11 @@
+""" This module is responsible for the communication with the OpenSearch server. It contains the OpenSearchManager class which is responsible for the communication with the OpenSearch server. It contains the following methods:"""
 from opensearchpy import OpenSearch
+from utils import Utils
 
 class openSearchManager:
 
     def __init__(self):
-
+        self.utils = Utils()
         host = 'localhost'
         port = 9200
         auth = ('admin', 'admin')
@@ -108,9 +110,9 @@ class openSearchManager:
     def extractTextFromResponse(self, response): #intended as a private function
         context = ""
         hits = response['hits']['hits']
-        for id, hit in enumerate(hits[:self.k]): 
+        for _, hit in enumerate(hits[:self.k]): 
             source = hit['_source']
-            context = context + f"""Chunk {id}: {source['text']}"""
+            context = context + f"{source['text']}"
             #print(f"Score: {hit['_score']}, Text: {source['text']}")
         cite = response['hits']['hits'][0]['_source']['cite']
         return context, cite

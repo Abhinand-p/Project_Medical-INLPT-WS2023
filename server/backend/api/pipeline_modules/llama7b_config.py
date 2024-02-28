@@ -4,6 +4,7 @@ import transformers
 from transformers import LlamaTokenizer
 from langchain.llms import HuggingFacePipeline 
 from dotenv import load_dotenv
+from utils import Utils
 
 class llamaManager:
 
@@ -11,6 +12,7 @@ class llamaManager:
         load_dotenv()
         model_id = 'meta-llama/Llama-2-7b-chat-hf' 
         hf_auth = os.getenv("HF_API_KEY")
+        self.utils = Utils()
         bnb_config = transformers.BitsAndBytesConfig( load_in_4bit=True, 
                                                     bnb_4bit_quant_type='nf4',
                                                     bnb_4bit_use_double_quant=True, 
@@ -31,14 +33,18 @@ class llamaManager:
                                             use_cache=True,
                                             )
         self.llm = HuggingFacePipeline(pipeline=generate_text)
-        
+        self.history = []
 
     def query(self, question, context):
-        print("###########  LLM: LLAMA 7b")
-        prompt = f"""Answer the question with the given Context:
-        Query: {question}
-        Contexts:
-        {context}"""
-        answer = self.llm(prompt)
-        print(answer)
-        return answer
+        if len(question) == 0 or len(context) == 0:
+            pass
+        else:
+            print("###########  LLM: LLAMA 7b")
+            augmented_prompt = f"1- Answer the question with the given Contexts.2- If it is not possible to answer based on given contexts, use the the following template and answer based on your knowledge.\n ``` There is no such data on provided Articles, However, based on my knowledge, I can say that... \n 3- If there are previous conversations use them as well. ``` \nQuestion:\n{question} \nContexts:\n{context}"
+            self.history.append(question)
+            answer = self.llm(augmented_prompt)
+            if not self.utils.extract_context(answer):
+                self.history.append(answer)
+                self.utils.save_conversation(self.history, Geneartor='LLAMA')
+            print(answer)
+            return answer
