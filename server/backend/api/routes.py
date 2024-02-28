@@ -1,16 +1,16 @@
 from fastapi import Body, APIRouter
-from .pipeline_modules import azure_config, chatGPT_config, llama7b_confiig, openSearchCllient, embedding_config
+from .pipeline_modules import azure_config, chatGPT_config, llama7b_config, openSearchClient, embedding_config
 router = APIRouter()
 
 #------------Initialize Pipeline Modules------------
 
 # Generation
 gpt3 = chatGPT_config.GPTManager()
-llama7b = llama7b_confiig.LlamaManager()
+llama7b = llama7b_config.LlamaManager()
 azure = azure_config.AzureManager()
 
 # Retrieval
-openSearch = openSearchCllient.OpenSearchManager()
+openSearch = openSearchClient.OpenSearchManager()
 
 # Embedding
 embed = embedding_config.EmbeddingManager()
