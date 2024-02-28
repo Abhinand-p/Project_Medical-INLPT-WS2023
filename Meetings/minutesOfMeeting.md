@@ -124,3 +124,12 @@
 3. New Dataset for better evaluation as we create three parameters where CD is the metadata concatenated.
 4. Starting with OpenSearch as a retrieval enviroment for better control with the metadata and vector space.
 5. Different strategies will be applied for RAG using opensearch.
+
+## 27 February - 2024 20:00
+
+Points to focus
+1. Documentation process
+2. Modularisation of the server backend code
+3. Query Transformation techniques
+4. Pending embeddings evaluation
+5. Checking the need to create Docker volume

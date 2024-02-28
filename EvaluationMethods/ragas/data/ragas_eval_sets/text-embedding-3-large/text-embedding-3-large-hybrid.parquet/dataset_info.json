@@ -6,14 +6,7 @@
       "dtype": "string",
       "_type": "Value"
     },
-    "ground_truths": {
-      "feature": {
-        "dtype": "string",
-        "_type": "Value"
-      },
-      "_type": "Sequence"
-    },
-    "answer": {
+    "ground_truth": {
       "dtype": "string",
       "_type": "Value"
     },
