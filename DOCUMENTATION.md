@@ -87,7 +87,33 @@ In the following parts all the methods that are used to accomplish the final pro
 3. One could also take the embedded chunks of an abstract and combine them by f.e. mean pooling, this way we end up with one embedding per abstarct agin
    - Not sure about the quality of the resulting embedding
 
+## Types of Questions and Answers
+The provided final product can answer following questions type:
+1. Confirmation Questions [yes or no]:
+   - Is Moog the author of article 'CASK Disorders'?
+   - 
 
+2. Factoid-type Questions [what, which, when, who, how]:
+   - Who is Moog?
+   - which articles were published in 2015?
+   - What is CASK Disorders?
+   - How to treat the CASK Disorders?
+
+3. List-type Questions: 
+   - List the name of auhtors of article 'CASK Disorders'.
+   - 
+
+4. Causal Questions [why or how]: 
+   - Why lung cancer is deadly?
+   - 
+
+5. Hypothetical Questions:
+   - What would happen if CASK Disorders is not treated?
+   - 
+
+● Complex Questions:
+   - What is relation of CASK Disorders in increasing the rate of breast cancer?
+   - 
 
 
 
