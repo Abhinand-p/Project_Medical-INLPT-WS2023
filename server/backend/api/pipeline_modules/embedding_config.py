@@ -1,5 +1,6 @@
 """ This file is responsible for managing the embedding models and their respective functions."""
 from openai  import  OpenAI
+from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 import voyageai
 import configparser
 
@@ -29,7 +30,18 @@ class EmbeddingManager:
         elif(embedding_model == self.embedding_list[1]):
             print("########### Emb Model: text-embedding-3-large")
             return self.text_embedding_3_large( question)
+        elif(embedding_model == self.embedding_list[2]):
+            return self.distilroberta_recursive( question)
         return 0
+    
+
+    def distilroberta_recursive(self, question):
+        embedding_model = 'sentence-transformers/all-distilroberta-v1'#'sentence-transformers/all-MiniLM-L6-v2' #all-mpnet-base-v2'
+        embed_model = HuggingFaceEmbeddings(
+            model_name=embedding_model,
+        )
+        
+        return embed_model.embed_documents(question)
     
 
     def text_embedding_3_large(self, question ):

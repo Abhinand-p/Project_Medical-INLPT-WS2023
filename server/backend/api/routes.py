@@ -18,7 +18,7 @@ embed = embedding_config.EmbeddingManager()
 
 #------------Configuration Options------------
 llm_list = ["GPT 3.5 Turbo 0125", "LLAMA-2-7b-chat-hf", "Azure-QA-Conversational"]
-index_list = ["voyage-2-large", "text-embedding-3-large"]
+index_list = ["voyage-2-large", "text-embedding-3-large", "distilroberta"]
 retrieval_list = ["Dense Retrieval", "Sparse Retrieval", "Hybrid Search"]
 
 
@@ -59,7 +59,10 @@ def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_str
   embedded_query = embed.controller(question, retrieval_strategy, index) #Index corresponds to embedding model since we have one index per mbedding model
 
   #Retrieve Data
-  context, cite = openSearch.controller(retrieval_strategy, embedded_query, question, index)
+  # [TODO] check if the index is correct
+  if index == "ditilroberta":
+    chunk = True
+  context, cite = openSearch.controller(retrieval_strategy, embedded_query, question, index, chunk)
 
   #Generate Answer based on requested LLM
   if llm == llm_list[0]:
