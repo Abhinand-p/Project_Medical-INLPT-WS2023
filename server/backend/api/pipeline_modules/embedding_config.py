@@ -12,19 +12,24 @@ class EmbeddingManager:
     def __init__(self):
         # config = configparser.ConfigParser()
         # config.read('config.ini')
-        voyageai.api_key = "pa-3xpcuUhVVgmOQPDBiG7ObYUA58rGn1eB1ZMaowr5xy0" # config['API_KEY']['VOYAGE_API_KEY']
+        #voyageai.api_key = config['API_KEY']['VOYAGE_API_KEY']
+        voyageai.api_key = "pa-3xpcuUhVVgmOQPDBiG7ObYUA58rGn1eB1ZMaowr5xy0"
+
+        #Config mbedding models
+        self.embedding_list = ["voyage-2-large", "text-embedding-3-large","distilroberta", "intfloat/e5-base-v2"]
 
         self.voyageAIClient = voyageai.Client()
 
         self.openAIClient = OpenAI(api_key= "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")
 
+        self.distilroberta = HuggingFaceEmbeddings(
+            model_name='sentence-transformers/all-distilroberta-v1')
+
         self.e5 = HuggingFaceEmbeddings(model_name="intfloat/e5-base-v2",
                                         model_kwargs={'device':'cpu'}, # Pass the model configuration options
                                         encode_kwargs={'normalize_embeddings': False,
                                         'batch_size': 32} # Pass the encoding options
-)
-
-        self.embedding_list = ["voyage-2-large", "text-embedding-3-large", "distilroberta", "intfloat/e5-base-v2"]
+                                        )
 
     # The controller takes the embedding model that was requested from front-end (inferred by the index) and decides which function to call corespondingly
     def controller(self, question,retrieval_strategy, embedding_model):
@@ -46,9 +51,9 @@ class EmbeddingManager:
         return 0
 
     def distilroberta_recursive(self, question):
-        embedding_model = 'sentence-transformers/all-distilroberta-v1'#'sentence-transformers/all-MiniLM-L6-v2' #all-mpnet-base-v2'
-        embed_model = HuggingFaceEmbeddings(model_name=embedding_model)
-        return embed_model.embed_documents(question)
+        embedded_question = self.distilroberta.embed_documents(question)[0]
+        print(type(embedded_question))
+        return embedded_question
 
     def text_embedding_3_large(self, question ):
         response = self.openAIClient.embeddings.create(

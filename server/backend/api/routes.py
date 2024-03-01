@@ -6,7 +6,7 @@ router = APIRouter()
 
 # Generation
 gpt3 = chatGPT_config.GPTManager()
-# llama7b = llama7b_config.LlamaManager()
+llama7b = llama7b_config.LlamaManager()
 azure = azure_config.AzureManager()
 
 # Retrieval
@@ -18,12 +18,10 @@ embed = embedding_config.EmbeddingManager()
 
 #------------Configuration Options------------
 llm_list = ["GPT 3.5 Turbo 0125", "LLAMA-2-7b-chat-hf", "Azure-QA-Conversational"]
-index_list = ["voyage-2-large", "text-embedding-3-large", "distilroberta"]
 retrieval_list = ["Dense Retrieval", "Sparse Retrieval", "Hybrid Search"]
 
 
 #------------Routes------------
-
 @router.post("/healthcheck")
 async def mirror(text: str = Body(..., embed= True)):
   return text
@@ -32,10 +30,12 @@ async def mirror(text: str = Body(..., embed= True)):
 @router.get("/getOpenSearchIndices")
 def getIndices():
   #Filter out default Indices that are always present
-  defaultIndices = set( [".plugins-ml-config",".opensearch-observability",".opensearch-sap-log-types-config", ".opendistro_security"])
+  defaultIndices = set( [".plugins-ml-config",".opensearch-observability",".opensearch-sap-log-types-config",".opendistro_security"])
   allIndices = openSearch.getAllIndices()
-  filtered_list1 = [item for item in allIndices if item not in defaultIndices]
-  return filtered_list1
+  filtered_list = [item for item in allIndices if item not in defaultIndices]
+  #Filter out security logs
+  filtered_list = [string for string in filtered_list if "security" not in string]
+  return filtered_list
 
 @router.get("/getLLMs")
 def getLLM():
@@ -53,10 +53,7 @@ def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_str
   embedded_query = embed.controller(question, retrieval_strategy, index) #Index corresponds to embedding model since we have one index per mbedding model
 
   #Retrieve Data
-  # [TODO] check if the index is correct
-  if index == "ditilroberta":
-    chunk = True
-  context, cite = openSearch.controller(retrieval_strategy, embedded_query, question, index, chunk)
+  context, source = openSearch.controller(retrieval_strategy, embedded_query, question, index)
 
   #Generate Answer based on requested LLM
   if llm == llm_list[0]:
@@ -70,7 +67,7 @@ def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_str
 
   # Send Citation
   if citation == "true":
-    answer = f"{answer} (Citation: {cite})"
+    answer = f"{answer} (Citation: {source})"
 
   return answer
 

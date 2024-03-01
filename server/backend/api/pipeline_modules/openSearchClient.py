@@ -20,28 +20,31 @@ class OpenSearchManager:
         self.k = 3
         self.retrieval_list = ["Dense Retrieval", "Sparse Retrieval", "Hybrid Search", "RetrievalQA"]
         self.chain_types = ["stuff", "refine", "map_reduce", "map_re_rank"]
+        #The following indices involve a different retrieval process
+        self.index_with_chunks = ["distilroberta", "e5-base-v2"]
 
     # The controller takes the retrieval strategy that was requested from front-end and decides which function to call corespondingly
-    def controller(self, retrieval_strategy, embedding, question, index, chunk):
+    def controller(self, retrieval_strategy, embedding, question, index):
         if(retrieval_strategy == self.retrieval_list[0]):
             print("########### Retrieval: Dense Retrieval")
-            return self.denseRetrieval(embedding, index, chunk)
+            return self.denseRetrieval(embedding, index)
 
         if(retrieval_strategy == self.retrieval_list[1]):
             print("########### Retrieval: Sparse Retrieval")
-            return self.sparseRetrieval(question, index, chunk)
+            return self.sparseRetrieval(question, index)
 
         if(retrieval_strategy == self.retrieval_list[2]):
             print("########### ERetrieval: Hybrid Search")
-            return self.hybridSearch(question,embedding, index, chunk)
+            return self.hybridSearch(question,embedding, index)
 
         # if(retrieval_strategy == self.retrieval_list[3]):
         #     print("########### Retrieval: RetrievalQA")
         #     return self.retrievalQA(question, index, chain_type)
 
-    def denseRetrieval(self ,embedding, index, chunk=False):
-        if chunk:
+    def denseRetrieval(self ,embedding, index):
+        if index in self.index_with_chunks:
             self.k = 10
+        else: self.k = 3
         knn_search_body = {
         "size": self.k,  # Number of nearest neighbors to retrieve
             "query": {
@@ -56,13 +59,14 @@ class OpenSearchManager:
         # Execute the search
         response = self.client.search(index=index, body=knn_search_body)
 
-        context, cite = self.extractTextFromResponse(response)
+        context, source = self.extractTextFromResponse(response,index)
 
-        return context, cite
+        return context, source
 
-    def sparseRetrieval(self ,question, index, chunk=False):
-        if chunk:
+    def sparseRetrieval(self ,question, index):
+        if index in self.index_with_chunks:
             self.k = 10
+        else: self.k = 3
         text_search_body = {
         "size" : self.k,
         "query": {
@@ -73,12 +77,13 @@ class OpenSearchManager:
         }
 
         response = self.client.search(index=index, body=text_search_body)
-        context, cite = self.extractTextFromResponse(response)
-        return context, cite
+        context, source = self.extractTextFromResponse(response,index)
+        return context, source
 
-    def hybridSearch(self, question,embedding, index, chunk=False):
-        if chunk:
+    def hybridSearch(self, question,embedding, index):
+        if index in self.index_with_chunks:
             self.k = 10
+        else: self.k = 3
         route = f"/{index}/_search?search_pipeline=nlp_search-pipeline"
 
         hybrid_search_body = {
@@ -87,7 +92,7 @@ class OpenSearchManager:
             "vector"
             ]
         },
-        "size" : self.k,
+        "size" : 5,
         "query": {
             "hybrid": {
             "queries": [
@@ -111,8 +116,8 @@ class OpenSearchManager:
         }
         }
         response  = self.client.transport.perform_request(method = "GET", url = route, body = hybrid_search_body) 
-        context, cite = self.extractTextFromResponse(response)
-        return context, cite
+        context, source = self.extractTextFromResponse(response,index)
+        return context, source
 
     # def retrievalQA(self, question, index, chain_type):
     #     rag_pipeline = RetrievalQA.from_chain_type(
@@ -123,27 +128,31 @@ class OpenSearchManager:
     #                                                 chain_type_kwargs={"verbose": True })
     #     return rag_pipeline(query)
 
-    def extractTextFromResponse(self, response, chunk=False): #intended as a private function
+    #private
+    def extractTextFromResponse(self, response):
         context = []
-        if chunk:
+        if index in self.index_with_chunks:
             for _, doc in enumerate(response['hits']['hits']):
                 context.append({
                     'id': doc['_id'],
-                    'text': doc['_source']['text'],
+                    'context': doc['_source']['text'],
                     'source': doc['_source']['cite']
             })
-            return context
+            return context, ""
         else:
             context = ""
             hits = response['hits']['hits']
-            for _, hit in enumerate(hits[:self.k]): 
+            for i, hit in enumerate(hits[:self.k]):
                 source = hit['_source']
-                context = context + f"{source['text']}"
+                context = context + f"Context {i}: {source['text']}"
                 #print(f"Score: {hit['_score']}, Text: {source['text']}")
-            cite = response['hits']['hits'][0]['_source']['cite']
-            return context, cite
+            source = response['hits']['hits'][0]['_source']['cite']
+            return context, source
 
     def getAllIndices(self):
+        #url = "_cat/indices?v"
+        #allIndices = self.client.transport.perform_request(method = "GET", url = url)
+
         allIndices = self.client.indices.get_alias().keys()
         allIndicesList = []
         for index in allIndices:
