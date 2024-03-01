@@ -500,7 +500,7 @@ PUT /med_e5_recursivechar_
                 },
             "type": "text"
             },
-        "vector_field": {
+        "vector": {
             "dimension": 768,
             "method": {
                 "engine": "nmslib",
@@ -1299,3 +1299,5 @@ GET med_e5_recursivechar_test/_search
         }
     }
 }
+
+GET _alias

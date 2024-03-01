@@ -13,17 +13,19 @@ from utils import Utils
 
 class GPTManager:
 
-    def __init__(self): 
+    def __init__(self):
         load_dotenv()
         self.utils = Utils()
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = "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" # os.getenv("OPENAI_API_KEY")
         if api_key is None:
             raise ValueError("OPENAI_API_KEY is not set")
         else:
             self.chat = ChatOpenAI(
-                openai_api_key= api_key,
+                api_key= api_key,
                 model='gpt-3.5-turbo-0125'
             )
+
+            # self.chain = RetrievalQA.from_chain_type(self.chat, retriever=vectorstore.as_retriever(), chain_type_kwargs={"prompt": prompt})
 
         self.messages  = []
         self.history = []

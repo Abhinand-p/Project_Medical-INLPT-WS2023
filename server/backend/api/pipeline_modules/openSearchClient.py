@@ -8,7 +8,7 @@ class OpenSearchManager:
         self.utils = Utils()
         host = 'localhost'
         port = 9200
-        auth = ('admin', 'admin')
+        auth = ('admin', '!akjdaDsdoij!oijadSsajd123120938')
 
         self.client = OpenSearch(
             hosts = [{'host': host, 'port': port}],
@@ -17,23 +17,27 @@ class OpenSearchManager:
             verify_certs = False,
             timeout=100
         )
-        self.k = 3 
-        self.retrieval_list = ["Dense Retrieval", "Sparse Retrieval", "Hybrid Search"]
+        self.k = 3
+        self.retrieval_list = ["Dense Retrieval", "Sparse Retrieval", "Hybrid Search", "RetrievalQA"]
+        self.chain_types = ["stuff", "refine", "map_reduce", "map_re_rank"]
 
     # The controller takes the retrieval strategy that was requested from front-end and decides which function to call corespondingly
     def controller(self, retrieval_strategy, embedding, question, index, chunk):
         if(retrieval_strategy == self.retrieval_list[0]):
             print("########### Retrieval: Dense Retrieval")
             return self.denseRetrieval(embedding, index, chunk)
-        
+
         if(retrieval_strategy == self.retrieval_list[1]):
             print("########### Retrieval: Sparse Retrieval")
             return self.sparseRetrieval(question, index, chunk)
-        
+
         if(retrieval_strategy == self.retrieval_list[2]):
             print("########### ERetrieval: Hybrid Search")
             return self.hybridSearch(question,embedding, index, chunk)
-    
+
+        # if(retrieval_strategy == self.retrieval_list[3]):
+        #     print("########### Retrieval: RetrievalQA")
+        #     return self.retrievalQA(question, index, chain_type)
 
     def denseRetrieval(self ,embedding, index, chunk=False):
         if chunk:
@@ -55,7 +59,6 @@ class OpenSearchManager:
         context, cite = self.extractTextFromResponse(response)
 
         return context, cite
-    
 
     def sparseRetrieval(self ,question, index, chunk=False):
         if chunk:
@@ -64,15 +67,14 @@ class OpenSearchManager:
         "size" : self.k,
         "query": {
             "match": {
-                "text": question  
+                "text": question
+                }
             }
-        }
         }
 
         response = self.client.search(index=index, body=text_search_body)
         context, cite = self.extractTextFromResponse(response)
         return context, cite
-    
 
     def hybridSearch(self, question,embedding, index, chunk=False):
         if chunk:
@@ -97,7 +99,7 @@ class OpenSearchManager:
                 }
                 },
                 {
-                "knn": {                 
+                "knn": {
                     "vector": {
                     "vector": embedding,
                     "k": self.k
@@ -111,7 +113,15 @@ class OpenSearchManager:
         response  = self.client.transport.perform_request(method = "GET", url = route, body = hybrid_search_body) 
         context, cite = self.extractTextFromResponse(response)
         return context, cite
-    
+
+    # def retrievalQA(self, question, index, chain_type):
+    #     rag_pipeline = RetrievalQA.from_chain_type(
+    #                                                 llm=index,
+    #                                                 chain_type=chain_type,
+    #                                                 verbose=True,
+    #                                                 retriever=vectorstore.as_retriever(search_kwargs={"k":5}),
+    #                                                 chain_type_kwargs={"verbose": True })
+    #     return rag_pipeline(query)
 
     def extractTextFromResponse(self, response, chunk=False): #intended as a private function
         context = []
@@ -132,7 +142,6 @@ class OpenSearchManager:
                 #print(f"Score: {hit['_score']}, Text: {source['text']}")
             cite = response['hits']['hits'][0]['_source']['cite']
             return context, cite
-    
 
     def getAllIndices(self):
         allIndices = self.client.indices.get_alias().keys()
@@ -141,8 +150,6 @@ class OpenSearchManager:
             allIndicesList.append(index)
 
         return allIndicesList
-    
-    
-    
+
 
 

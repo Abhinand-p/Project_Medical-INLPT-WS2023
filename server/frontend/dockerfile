@@ -1,11 +1,17 @@
 FROM node:18-alpine
 
+# Set the working directory inside the container
 WORKDIR /app/
 
-COPY public/ /app/
-COPY src/ /app/
-COPY package.json /app/
+# Copy the rest of the application code to the container
+COPY . /app/
+COPY package*.json /app/
 
+# Install dependencies
 RUN npm install
 
+# Expose a port (e.g., 3000) for the application
+EXPOSE 3000
+
+# Start the React app when the container runs
 CMD ["npm", "start"]

@@ -1,4 +1,4 @@
-docker login --username=hrida --email=h.rida1@hotmail.com
+docker login --username=hrida
 
 docker build -t lamp:%1 -t lamp .
 

@@ -6,7 +6,7 @@ router = APIRouter()
 
 # Generation
 gpt3 = chatGPT_config.GPTManager()
-llama7b = llama7b_config.LlamaManager()
+# llama7b = llama7b_config.LlamaManager()
 azure = azure_config.AzureManager()
 
 # Retrieval
@@ -32,28 +32,22 @@ async def mirror(text: str = Body(..., embed= True)):
 @router.get("/getOpenSearchIndices")
 def getIndices():
   #Filter out default Indices that are always present
-  defaultIndices =set( [".plugins-ml-config",".opensearch-observability",".opensearch-sap-log-types-config",
-               ".opendistro_security"])
+  defaultIndices = set( [".plugins-ml-config",".opensearch-observability",".opensearch-sap-log-types-config", ".opendistro_security"])
   allIndices = openSearch.getAllIndices()
   filtered_list1 = [item for item in allIndices if item not in defaultIndices]
-
   return filtered_list1
-
 
 @router.get("/getLLMs")
 def getLLM():
   return llm_list
 
-
 @router.get("/getRetrievalStrategy")
 def getRetrieval():
   return retrieval_list
 
-
 @router.post("/pipeline")
-def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_strategy:str= Body(..., embed=True), 
+def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_strategy:str= Body(..., embed=True),
                  index:str= Body(..., embed=True),llm:str= Body(..., embed=True), citation:str= Body(..., embed=True)):
-
 
   #Embed query
   embedded_query = embed.controller(question, retrieval_strategy, index) #Index corresponds to embedding model since we have one index per mbedding model
@@ -70,11 +64,11 @@ def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_str
 
   elif llm == llm_list[1]:
     answer = llama7b.query(question, context)
-    
+
   elif llm == llm_list[2]:
     answer = azure.query(question, context)
 
-  # Send Citation 
+  # Send Citation
   if citation == "true":
     answer = f"{answer} (Citation: {cite})"
 
