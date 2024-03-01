@@ -21,24 +21,25 @@ class OpenSearchManager:
         self.retrieval_list = ["Dense Retrieval", "Sparse Retrieval", "Hybrid Search"]
 
     # The controller takes the retrieval strategy that was requested from front-end and decides which function to call corespondingly
-    def controller(self, retrieval_strategy, embedding, question, index):
+    def controller(self, retrieval_strategy, embedding, question, index, chunk):
         if(retrieval_strategy == self.retrieval_list[0]):
             print("########### Retrieval: Dense Retrieval")
-            return self.denseRetrieval(embedding, index)
+            return self.denseRetrieval(embedding, index, chunk)
         
         if(retrieval_strategy == self.retrieval_list[1]):
             print("########### Retrieval: Sparse Retrieval")
-            return self.sparseRetrieval(question, index)
+            return self.sparseRetrieval(question, index, chunk)
         
         if(retrieval_strategy == self.retrieval_list[2]):
             print("########### ERetrieval: Hybrid Search")
-            return self.hybridSearch(question,embedding, index)
+            return self.hybridSearch(question,embedding, index, chunk)
     
 
-    def denseRetrieval(self ,embedding, index):
-
+    def denseRetrieval(self ,embedding, index, chunk=False):
+        if chunk:
+            self.k = 10
         knn_search_body = {
-        "size": 5,  # Number of nearest neighbors to retrieve
+        "size": self.k,  # Number of nearest neighbors to retrieve
             "query": {
                 "knn": {
                     "vector": {
@@ -56,7 +57,9 @@ class OpenSearchManager:
         return context, cite
     
 
-    def sparseRetrieval(self ,question, index):
+    def sparseRetrieval(self ,question, index, chunk=False):
+        if chunk:
+            self.k = 10
         text_search_body = {
         "size" : self.k,
         "query": {
@@ -71,7 +74,9 @@ class OpenSearchManager:
         return context, cite
     
 
-    def hybridSearch(self, question,embedding, index):
+    def hybridSearch(self, question,embedding, index, chunk=False):
+        if chunk:
+            self.k = 10
         route = f"/{index}/_search?search_pipeline=nlp_search-pipeline"
 
         hybrid_search_body = {
@@ -80,6 +85,7 @@ class OpenSearchManager:
             "vector"
             ]
         },
+        "size" : self.k,
         "query": {
             "hybrid": {
             "queries": [
@@ -107,15 +113,25 @@ class OpenSearchManager:
         return context, cite
     
 
-    def extractTextFromResponse(self, response): #intended as a private function
-        context = ""
-        hits = response['hits']['hits']
-        for _, hit in enumerate(hits[:self.k]): 
-            source = hit['_source']
-            context = context + f"{source['text']}"
-            #print(f"Score: {hit['_score']}, Text: {source['text']}")
-        cite = response['hits']['hits'][0]['_source']['cite']
-        return context, cite
+    def extractTextFromResponse(self, response, chunk=False): #intended as a private function
+        context = []
+        if chunk:
+            for _, doc in enumerate(response['hits']['hits']):
+                context.append({
+                    'id': doc['_id'],
+                    'text': doc['_source']['text'],
+                    'source': doc['_source']['cite']
+            })
+            return context
+        else:
+            context = ""
+            hits = response['hits']['hits']
+            for _, hit in enumerate(hits[:self.k]): 
+                source = hit['_source']
+                context = context + f"{source['text']}"
+                #print(f"Score: {hit['_score']}, Text: {source['text']}")
+            cite = response['hits']['hits'][0]['_source']['cite']
+            return context, cite
     
 
     def getAllIndices(self):
@@ -125,6 +141,7 @@ class OpenSearchManager:
             allIndicesList.append(index)
 
         return allIndicesList
+    
     
     
 

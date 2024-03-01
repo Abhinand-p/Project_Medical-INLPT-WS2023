@@ -30,15 +30,21 @@ class GPTManager:
 
     def query(self, question, context):
         print("###########  LLM: GPT")
+        #If more than two different prompt msg is needed, implement dictionary
+        system_prompt1 = "You are a researcher on Medical Intelligence, that can answer questions based on the provided articles."
+        system_prompt2 = "You are a friendly Assistant that will answer Questions based on given Contexts."
+        user_prompt1 = f"1- Answer the question with the regarding all chunked Contexts.2- If there are more than one answer provide all of them with resources.\n 3- If it is not possible to answer based on given contexts, Explicitly say that and answer based on your knowledge.\n4- provide the resources for each chunk at the end of your message.\n 5- If there is previous answers from you use them as well with reference \nQuestion:\n{question} \nContexts:\n{context}"
+        user_prompt2 = f"Answer the following question: {question} based on the following chunked texts: {context}. 1- If there is no answer based on provided texts, just say 'I cannot provide an answer based on the provided text.'"
+
         # Check if the question or context is empty
         if len(question) == 0 or len(context) == 0:
             pass
         else:
             self.messages  = [
-            SystemMessage(content="You are a friendly Assistant that will answer Questions based on given Contexts."),
+            SystemMessage(content=system_prompt1),
         ]
             # Augment the prompt with the question and context
-            augmented_prompt = f"1- Answer the question with the given Contexts.2- If it is not possible to answer based on given contexts, use the the following template and answer based on your knowledge.\n ``` There is no such data on provided Articles, However, based on my knowledge, I can say that... \n 3- If there are previous conversations use them as well. ``` \nQuestion:\n{question} \nContexts:\n{context}"
+            augmented_prompt = user_prompt1
             self.history.append(question)
         #ToDo: Check Size of messages so we dont exceed conext window of 16835 tokens
         #Naive approach; keep mesages in memory shorter than 3
