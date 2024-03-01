@@ -41,7 +41,7 @@ class GPTManager:
         #If more than two different prompt msg is needed, implement dictionary
         user_prompt1 = f"1- Answer the question with the regarding all chunked Contexts.2- If there are more than one answer provide all of them with resources.\n 3- If it is not possible to answer based on given contexts, Explicitly say that and answer based on your knowledge.\n4- provide the resources for each chunk at the end of your message.\n 5- If there is previous answers from you use them as well with reference \nQuestion:\n{question} \nContexts:\n{context}"
         user_prompt2 = f"Answer the following question: {question} based on the following chunked texts: {context}. 1- If there is no answer based on provided texts, just say 'I cannot provide an answer based on the provided text.'"
-        user_prompt3 = f"1- Answer the question with the given Contexts 2. For each Context that you used for the answer, get its source and append it to your answer  3. If the user specifically asks something about a answer you gave in the past, do so and ignore the context 3. \n If it is not possible to answer based on given texts, Explicitly say that and answer based on your knowledge. \nQuestion:\n{question} \n Contexts:\n{context}"
+        user_prompt3 = f"1- Answer the question with the given Contexts 2. If there is no Context try to answer the question with the previous messages 3. For each Context that you used for the answer, get its source and append it to your answer  3. If the user specifically asks something about a answer you gave in the past, do so and ignore the context 3. \n If it is not possible to answer based on given texts, Explicitly say that and answer based on your knowledge. \nQuestion:\n{question} \n Contexts:\n{context}"
 
         # Augment the prompt with the question and contexty
 
@@ -66,7 +66,7 @@ class GPTManager:
             ))
             print(self.messages)
             #Make sure Hat history wont get too big
-            #self.chatHistoryHousekeeping()
+            self.chatHistoryHousekeeping()
             return answer
         else:
             pass
