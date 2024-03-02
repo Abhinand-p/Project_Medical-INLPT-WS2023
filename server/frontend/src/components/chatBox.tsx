@@ -11,6 +11,7 @@ import {
   IconButton,
   TooltipProps,
   tooltipClasses,
+  CircularProgress,
 } from "@mui/material";
 import { Slider, FormControlLabel, Switch } from '@mui/material';
 import { padding, styled } from "@mui/system";
@@ -91,7 +92,6 @@ const ChatComponent: React.FC = () => {
     });
     async function getIndicies(this: any){
       try{
-        console.log("calling")
         const response = await fetch(requestIndices);
         const data = await response.json();
         setOpenSearchIndices_list(data)
@@ -106,7 +106,6 @@ const ChatComponent: React.FC = () => {
     });
     async function getLLMs(this: any){
       try{
-        console.log("calling")
         const response = await fetch(requestLLm);
         const data = await response.json();
         setllms_list(data)
@@ -121,7 +120,6 @@ const ChatComponent: React.FC = () => {
     });
     async function getRetrievalStrategy(this: any){
       try{
-        console.log("calling")
         const response = await fetch(requestRetrievalStrategy);
         const data = await response.json();
         setRetrievalStrategies_list(data)
@@ -131,12 +129,23 @@ const ChatComponent: React.FC = () => {
   
       }
     }
-    getIndicies()
-    getLLMs()
-    getRetrievalStrategy()
+    const checkIfBackendIsUpRequest = new Request("http://127.0.0.1:8000/healthcheck", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: "yes"
+      }),
+    });
 
-  }, []); 
-
+    setTimeout(() => {
+      getIndicies()
+      getLLMs()
+      getRetrievalStrategy()
+    }, 8000); 
+  
+  },[]); 
 
   const request = new Request("http://127.0.0.1:8000/pipeline", {
     method: "POST",
@@ -293,7 +302,8 @@ const ChatComponent: React.FC = () => {
         borderRadius: "10px",
         marginLeft: "10px"
       }}>
-      
+      {openSearchIndices_list.length !== 0 ?(
+      <>
       <div className="dropdown">
         <select id="dropdown1" value={retrievalStrategies} onChange={handleDropdownChange_retrieval}>
           <option value="">Retrieval Strategy</option>
@@ -333,9 +343,9 @@ const ChatComponent: React.FC = () => {
         }}
         control={<Switch checked={citationActive} onChange={() => {
           setCitationActive(!citationActive)
-          console.log("Citation Mode: ",citationActive)
+          console.log("Source Mode: ",citationActive)
         }} />}
-        label= "Citation Mode"
+        label= "Source Mode"
       />
     </div>
     <Box sx={{ paddingLeft: "5px" }}>
@@ -346,10 +356,12 @@ const ChatComponent: React.FC = () => {
         </IconButton>
       </CustomWidthTooltip >
     </Box>
-    
 
+</>
+    ): (<CircularProgress sx={{     display: 'flex', justifyContent: 'center', alignItems: 'center',    top: "50%",
+    left: "80%",
 
-  
+     }}/>)}
       </Box>)}
 
       

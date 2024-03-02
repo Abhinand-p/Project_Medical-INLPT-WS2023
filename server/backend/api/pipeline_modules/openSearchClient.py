@@ -52,7 +52,6 @@ class OpenSearchManager:
         for keyword in non_IR_keyphrase:
             ratio = fuzz.ratio(question, keyword)
             #ratio of 80 mean a moderate match, 100 would mean completley strict match
-            print("FUZZYWUZZY YUUUUUUUU", ratio)
             if ratio >= 80:
                 return False
 
@@ -74,9 +73,9 @@ class OpenSearchManager:
         # Execute the search
         response = self.client.search(index=index, body=knn_search_body)
 
-        context, source = self.extractTextFromResponse(response,index)
+        context = self.extractTextFromResponse(response,index)
 
-        return context, source
+        return context
 
     def sparseRetrieval(self ,question, index):
         if index in self.index_with_chunks:
@@ -92,8 +91,8 @@ class OpenSearchManager:
         }
 
         response = self.client.search(index=index, body=text_search_body)
-        context, source = self.extractTextFromResponse(response,index)
-        return context, source
+        context = self.extractTextFromResponse(response,index)
+        return context
 
     def hybridSearch(self, question,embedding, index):
         if index in self.index_with_chunks:
@@ -133,8 +132,8 @@ class OpenSearchManager:
         }
         }
         response  = self.client.transport.perform_request(method = "GET", url = route, body = hybrid_search_body) 
-        context, source = self.extractTextFromResponse(response,index)
-        return context, source
+        context = self.extractTextFromResponse(response,index)
+        return context
 
     # def retrievalQA(self, question, index, chain_type):
     #     rag_pipeline = RetrievalQA.from_chain_type(
@@ -143,7 +142,7 @@ class OpenSearchManager:
     #                                                 verbose=True,
     #                                                 retriever=vectorstore.as_retriever(search_kwargs={"k":5}),
     #                                                 chain_type_kwargs={"verbose": True })
-    #     return rag_pipeline(query)
+    #     return rag_ppeline(query)
 
     #private
     def extractTextFromResponse(self, response, index):
@@ -155,7 +154,7 @@ class OpenSearchManager:
                     'context': doc['_source']['text'],
                     'source': doc['_source']['cite']
             })
-            return context, ""
+            return context
         else:
             context = ""
             hits = response['hits']['hits']
@@ -163,8 +162,7 @@ class OpenSearchManager:
                 source = hit['_source']
                 context = context + f"Context {i}: {source['text']}"
                 #print(f"Score: {hit['_score']}, Text: {source['text']}")
-            source = response['hits']['hits'][0]['_source']['cite']
-            return context, source
+            return context
 
     def getAllIndices(self):
         #url = "_cat/indices?v"
