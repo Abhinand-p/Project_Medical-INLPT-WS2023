@@ -19,8 +19,8 @@ class OpenSearchManager:
             timeout=100
         )
         self.k = 2
-        self.retrieval_list = ["Dense Retrieval", "Sparse Retrieval", "Hybrid Search", "RetrievalQA"]
-        self.chain_types = ["stuff", "refine", "map_reduce", "map_re_rank"]
+        self.retrieval_list = ["Dense Retrieval", "Sparse Retrieval", "Hybrid Search"]
+
         #The following indices involve a different retrieval process
         self.index_with_chunks = ["distilroberta", "e5-base-v2"]
 
@@ -40,11 +40,7 @@ class OpenSearchManager:
 
         if(retrieval_strategy == self.retrieval_list[2]):
             print("########### ERetrieval: Hybrid Search")
-            return self.hybridSearch(question,embedding, index)
-
-        # if(retrieval_strategy == self.retrieval_list[1]):
-        #     print("########### Retrieval: RetrievalQA")
-        #     return self.retrievalQA(question, index, chain_type)
+            return self.hybridSearch(question, embedding, index)
 
     #if one of these key phrases is inside the query it strogly suggests that we dont need an IR
     def checkQuery(self, question):
@@ -134,15 +130,6 @@ class OpenSearchManager:
         response  = self.client.transport.perform_request(method = "GET", url = route, body = hybrid_search_body) 
         context = self.extractTextFromResponse(response,index)
         return context
-
-    # def retrievalQA(self, question, index, chain_type):
-    #     rag_pipeline = RetrievalQA.from_chain_type(
-    #                                                 llm=index,
-    #                                                 chain_type=chain_type,
-    #                                                 verbose=True,
-    #                                                 retriever=vectorstore.as_retriever(search_kwargs={"k":5}),
-    #                                                 chain_type_kwargs={"verbose": True })
-    #     return rag_ppeline(query)
 
     #private
     def extractTextFromResponse(self, response, index):

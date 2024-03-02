@@ -67,5 +67,4 @@ class EmbeddingManager:
 
     def intfloat_e5_base_v2(self,question):
         response = self.e5.embed_query(question)
-        print("eefsef",response)
         return response

@@ -1,7 +1,8 @@
 """This module contains the utility functions for the backend server."""
 import re, pickle
-
-
+from langchain.output_parsers import PydanticOutputParser
+from langchain.pydantic_v1 import BaseModel, Field
+from typing import List
 
 class Utils:
     def __init__(self) -> None:
@@ -37,3 +38,18 @@ class Utils:
             return match.group(1)
         else:
             return None
+
+# Output parser will split the LLM result into a list of queries
+class LineList(BaseModel):
+    def __init__(self) -> None:
+        pass
+    # "lines" is the key (attribute name) of the parsed output
+    lines: List[str] = Field(description="Lines of text")
+
+class LineListOutputParser(PydanticOutputParser):
+    def __init__(self) -> None:
+        super().__init__(pydantic_object=LineList)
+
+    def parse(self, text: str) -> LineList:
+        lines = text.strip().split("\n")
+        return LineList(lines=lines)
