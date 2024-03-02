@@ -12,8 +12,19 @@ Your report needs to give the following information:
 * Anti-plagiarism Confirmation: 
 By submitting this work, We confirm that it is entirely our own original creation and that We have not plagiarized any material from any source. We have cited all sources used appropriately, and any similarities found with existing works are purely coincidental. We understand that any form of plagiarism is strictly prohibited and may result in severe consequences, including academic penalties.
 
+* Responsibilities:
+
+| Data Acquisition | Data Preprocessing | Data Retrieval | Fronend | Backend | ... |
+
+|--------------------|----------------------|-----------------|-----------|----------|---|
+
+| Abhinand---------| Behrooz------------| all-------------  | John------| John----| Cell 6   |
+
+| Behrooz-----------| ---------------------| ---------------  | Hussein--   | Hussein   | Cell 6   |
+
+
 ## Introduction
-In an era dominated by vast amounts of scientific literature, accessing and comprehending relevant information poses a significant challenge for researchers and professionals. Our project addresses this issue by implementing a Retrieval Augmented Generation (RAG) system connected to GPT-3.5 and Llama 2, a state-of-the-art language model developed by OpenAI and Meta. This system aims to facilitate the extraction and synthesis of information from articles containing 'Intelligence' hosted on PubMed, a widely used database of biomedical literature.
+In an era dominated by vast amounts of scientific literature, accessing and comprehending relevant information poses a significant challenge for researchers and professionals. Our project addresses this issue by implementing a Retrieval Augmented Generation (RAG) system connected to GPT-3.5 and Llama 2, a state-of-the-art language model developed by OpenAI and Meta. This system aims to facilitate the extraction and synthesis of information from articles containing 'Intelligence' hosted on PubMed [1], a widely used database of biomedical literature.
 
 The primary objective of our project is to provide an intuitive and efficient means for users to query articles stored from PubMed and receive comprehensive and contextually relevant answers to their questions. As none of the LLMs are working with updated data, they all suffer from providing answers based on most recent information. By leveraging the capabilities of GPT-3.5 and integrating it with a retrieval mechanism, we empower users to pose natural language queries and obtain synthesized responses tailored to their information needs based on most recent data.
 
@@ -47,21 +58,21 @@ points of previous work relate to your project."""
 In the following parts all the methods that are used to accomplish the final project are addressed. Those, that are labeled as [Outdated] are part of experiment we did but not used in the final product.
 
 ### Data Acquisition
+From the pubmed section intelligence [2], we gathered abstracts between 2013-2023 that contains term 'Intelligence' from pubmed. To do this we provided different technique that is clarified as follow:
+
 1. API:
-   - By this approach we downloaded the xml file, which was later processed and the usefull data extracted using the preprocessing notbook and finally the csv file of the related data was created. As the whole dataset was too big to be pushed to github, we used hugging-face to host our dataset. This also changed later by storing the dataset and their embedding on opensearch.
+   - By this approach we downloaded the xml file, which was later processed and the usefull data extracted, using the preprocessing notbook, and finally the csv file of the related data was created. As the whole dataset was too big to be pushed to github, we used hugging-face to host our dataset. This also changed later by storing the dataset and their embedding on opensearch.
 
 2. Crawler:[Outdated]
-   - Using this method we implement a crawler using selenium to extract each abstract, its title and the respective authors from Pubmed one by one
+   - Using this method we implement a crawler using selenium to extract each abstract, its title and the respective authors from Pubmed one by one.
 
 ### Data Preprocessing
-   - In this phase of the project we used the xml file of data from Pubmed and extract 17 usefull metadata from them with respective data.
-   - in the next phase we create another dataset containg only Ids (PMID) and concatenated columns of abstracts, titles, data of publication, authors, medical keys related to each abstracts and name of journal. By which we can answer more type of questions[TODO][Link to Type of question] based on our dataset.
+   During this phase of the project, we engaged in the utilization of XML files sourced from Pubmed, aiming to extract a comprehensive set of 17 metadata attributes accompanied by their corresponding data points. Subsequently, in the subsequent phase, we proceeded to curate an additional dataset comprising solely the unique identifiers (PMID) alongside amalgamated columns encompassing abstracts, titles, publication dates, author information, medical subject headings pertinent to each abstract, and journal titles. The construction of this refined dataset facilitates enhanced analytical capabilities, thereby enabling the exploration and resolution of a wider array of inquiries, as delineated in our project objectives [Types of Questions and Answers](#Types-of-Questions-and-Answers). This augmentation of data granularity and scope contributes to the enrichment of our research endeavors, fostering deeper insights and robust conclusions within the domain under investigation.
 ### Data Storage
 1. Opensearch: Cloud based
 
-2. Opensearch: Cloud based, split approach
-   - Storage: As we used different models to embed the the dataset, and based on their limitations on maximum length, we had to chunk the context of each abstracts. The cuncks with relative id, PMID-chunk_number, beside the embedding, context and resources of each context are stored in opensearch.
-   - Retrieval: Using hybrid serach in opensearch, the most k relevant data was retrieved.
+2. OpenSearch [3], a cloud-based platform:
+    adopts a split approach for efficient management of data. Regarding storage, the utilization of diverse embedding models necessitated the segmentation of dataset contexts due to the limitations imposed by maximum length constraints. Consequently, each abstract's context was partitioned into chunks, each identified by a relative ID format, such as PMID-chunk_number. These chunks, along with their associated embeddings, context, and pertinent resources, are stored within the OpenSearch infrastructure. Concerning retrieval, a hybrid search methodology is employed, leveraging the capabilities of OpenSearch to retrieve the k most relevant pieces of data efficiently. This approach enhances the effectiveness of information retrieval within the system, facilitating optimized access to pertinent information. Further exploration of the mechanisms underlying this hybrid search strategy may shed light on its efficacy and potential avenues for refinement and improvement.
 
 3. Pinecone: Cloud based, split approach[Outdated]
    - Storage: Uploading embedding vectors on cloud based VectorDB (Pinecone) and respective abstract's metadata in seperate no-SQL DB (FaunaDB). Use a key to map vectors to metadata between the databases.
@@ -70,9 +81,7 @@ In the following parts all the methods that are used to accomplish the final pro
 
 
 ### Data Retrieval
-### 1. TF-IDF[Outdated]
-   - In this Approach we used the TfidfVectorizer from sklearn and set the analyzing level to characters which provided us the misspelling tolerance. Moreover, we used nltk to add the synonyms to the search of most k relevant abstacts. 
-### 2. Embeddings
+### 1. Embeddings
 #### 1. Approach
 1. PubMedBERT, per-abstract embedding
    - BERT model finetuned on PubMed data, information retrieval/ QA, maps into 768 dimensional vectorspace, up to 512 token.
@@ -86,6 +95,10 @@ In the following parts all the methods that are used to accomplish the final pro
    - Code can be found at: embedding\INLPT2023_2024.ipynb
 3. One could also take the embedded chunks of an abstract and combine them by f.e. mean pooling, this way we end up with one embedding per abstarct agin
    - Not sure about the quality of the resulting embedding
+### 2. Approach
+   - In this methodology, drawn from the Transformer library, the AutoTokenizer module is employed to perform tokenization on the dataset utilizing the pretrained model 'sentence-transformers/all-distilroberta-v1' [4]. This process is facilitated by the 'RecursiveCharacterTextSplitter' function from the langchain.text_splitter module. Given the constraint that the maximum input length for this model is 512 tokens, yielding an output dimensionality of 768, a decision was made to partition the data into chunks of size 400, with a 50-token overlap between consecutive chunks. This strategy is implemented to preserve the contextual coherence within each abstract. The adoption of character-based splitting ensures a degree of robustness to misspellings, thereby enhancing the model's retrieval capabilities. Admittedly, chunking the data results in an increased number of units, yet it concurrently enhances the efficiency of data retrieval and search operations. This trade-off between granularity and efficiency underscores the pragmatic considerations governing the data preprocessing stage in natural language processing tasks.
+### 2. TF-IDF[Outdated]
+   - In this Approach we used the TfidfVectorizer from sklearn and set the analyzing level to characters which provided us the misspelling tolerance. Moreover, we used nltk to add the synonyms to the search of most k relevant abstacts. 
 
 ## Types of Questions and Answers
 The provided final product can answer following questions type:
@@ -178,8 +191,27 @@ on the limitations of your work. Potentially, you can also outline how your mode
 extended or improved in the future, or you can briefly give insights into what you have
 learned during the project.
 ## References
-List your references at the end of your report. You can add them as a list at the end of your
+
+[1]: #ref1
+[2]: #ref2
+[3]: #ref3
+[4]: #ref4
+
+
+
+
+[National Center for Biotechnology Information. (n.d.). PubMed. Retrieved Oct. 30, 2023, from https://pubmed.ncbi.nlm.nih.gov/](#ref1)
+
+[National Center for Biotechnology Information. (n.d.). PubMed. Retrieved Nov. 05, 2023, from https://pubmed.ncbi.nlm.nih.gov/?term=intelligence+%5BTitle%2Fabstract%5D&filter=simsearch1.fha&filter=years.2013-2023&sort=date&size=200](#ref2)
+
+[OpenSearch. (n.d.). About OpenSearch. Retrieved Feb. 01, 2024, from https://opensearch.org/docs/latest/about/](#ref3)
+
+[Hugging Face. (n.d.). README.md. Sentence Transformers - DistilRoBERTa, a distilled version of RoBERTa. Retrieved Feb. 01, 2024, from https://huggingface.co/sentence-transformers/all-distilroberta-v1/blame/e5e0bbabc6e2c6e494a64b5018d1b40775b173a7/README.md](#ref4)
+
+
+
+"""List your references at the end of your report. You can add them as a list at the end of your
 report and refer to the author's name and year in the text, e.g., [Gertz et al.
 2020](#link-to-the-bib-section). Make sure you follow proper citation methods and include
 all author's names, the name of the journal or conference, the full title of the paper, and the
-publication year.
+publication year."""
