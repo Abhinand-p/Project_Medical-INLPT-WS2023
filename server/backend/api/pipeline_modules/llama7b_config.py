@@ -5,33 +5,55 @@ from transformers import LlamaTokenizer
 from langchain.llms import HuggingFacePipeline
 from dotenv import load_dotenv
 from utils import Utils
+import torch
 
 class LlamaManager:
 
     def __init__(self):
         load_dotenv()
-        model_id = 'meta-llama/Llama-2-7b-chat-hf'
-        hf_auth = os.getenv("HF_API_KEY")
+
         self.utils = Utils()
-        bnb_config = transformers.BitsAndBytesConfig( load_in_4bit=True,
+        hf_auth = "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" # os.getenv("HF_API_KEY")
+        model_id = 'meta-llama/Llama-2-7b-chat-hf'
+
+        model_config = transformers.AutoConfig.from_pretrained(model_id, token=hf_auth)
+
+        # Check if CUDA is available
+        if torch.cuda.is_available():
+            device = torch.device('cuda')
+            print("CUDA is available - Quantization bnb_config will be applied.")
+            bnb_config = transformers.BitsAndBytesConfig(load_in_4bit=True,
                                                     bnb_4bit_quant_type='nf4',
                                                     bnb_4bit_use_double_quant=True,
-                                                    bnb_4bit_compute_dtype=bfloat16 )
-        model_config = transformers.AutoConfig.from_pretrained( model_id, token=hf_auth )
-        model = transformers.AutoModelForCausalLM.from_pretrained(model_id,
+                                                    bnb_4bit_compute_dtype=bfloat16)
+
+            model = transformers.AutoModelForCausalLM.from_pretrained(model_id,
                                                                 trust_remote_code=True,
                                                                 config=model_config,
                                                                 quantization_config=bnb_config,
                                                                 device_map="auto",
-                                                                token=hf_auth )
-        tokenizer = LlamaTokenizer.from_pretrained("meta-llama/Llama-2-13b-chat-hf",token=hf_auth)
+                                                                token=hf_auth)
+            model.to(device)
+        else:
+            device = torch.device('cpu')
+            print("CUDA is not available - Quantization bnb_config will be not applied.")
+            model = transformers.AutoModelForCausalLM.from_pretrained(model_id,
+                                                                trust_remote_code=True,
+                                                                config=model_config,
+                                                                low_cpu_mem_usage=True,
+                                                                token=hf_auth)
+            model.to(device)
+
+        tokenizer = LlamaTokenizer.from_pretrained("meta-llama/Llama-2-13b-chat-hf",token=hf_auth, device=device)
+
         generate_text = transformers.pipeline( model=model, tokenizer=tokenizer,
                                             return_full_text=True,
                                             task='text-generation',
                                             max_new_tokens=512,
                                             repetition_penalty=1.1,
                                             use_cache=True,
-                                            )
+                                            device=device)
+
         self.llm = HuggingFacePipeline(pipeline=generate_text)
         self.history = []
 
