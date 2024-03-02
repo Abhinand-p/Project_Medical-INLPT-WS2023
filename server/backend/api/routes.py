@@ -6,7 +6,7 @@ router = APIRouter()
 
 # Generation
 gpt3 = chatGPT_config.GPTManager()
-llama7b = llama7b_config.LlamaManager()
+# llama7b = llama7b_config.LlamaManager()
 azure = azure_config.AzureManager()
 
 # Retrieval
@@ -58,8 +58,8 @@ def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_str
   if llm == llm_list[0]:
     answer = gpt3.query(question, context)
 
-  elif llm == llm_list[1]:
-    answer = llama7b.query(question, context)
+  # elif llm == llm_list[1]:
+  #   answer = llama7b.query(question, context)
 
   elif llm == llm_list[2]:
     answer = azure.query(question, context)
