@@ -1,9 +1,7 @@
 """ This file is responsible for managing the embedding models and their respective functions."""
 from openai  import  OpenAI
-from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 import voyageai
-import configparser
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
 #One index corresponds to 1 embedding model
 
@@ -16,7 +14,7 @@ class EmbeddingManager:
         voyageai.api_key = "pa-3xpcuUhVVgmOQPDBiG7ObYUA58rGn1eB1ZMaowr5xy0"
 
         #Config mbedding models
-        self.embedding_list = ["voyage-2-large", "text-embedding-3-large","distilroberta", "intfloat/e5-base-v2"]
+        self.embedding_list = ["voyage-2-large", "text-embedding-3-large","distilroberta", "e5-base-v2"]
 
         self.voyageAIClient = voyageai.Client()
 
@@ -69,4 +67,5 @@ class EmbeddingManager:
 
     def intfloat_e5_base_v2(self,question):
         response = self.e5.embed_query(question)
+        print("eefsef",response)
         return response

@@ -1,6 +1,7 @@
 """ This module is responsible for the communication with the OpenSearch server. It contains the OpenSearchManager class which is responsible for the communication with the OpenSearch server. It contains the following methods:"""
 from opensearchpy import OpenSearch
 from utils import Utils
+from fuzzywuzzy import fuzz
 
 class OpenSearchManager:
 
@@ -8,7 +9,7 @@ class OpenSearchManager:
         self.utils = Utils()
         host = 'localhost'
         port = 9200
-        auth = ('admin', '!akjdaDsdoij!oijadSsajd123120938')
+        auth = ('admin', 'admin')
 
         self.client = OpenSearch(
             hosts = [{'host': host, 'port': port}],
@@ -17,14 +18,20 @@ class OpenSearchManager:
             verify_certs = False,
             timeout=100
         )
-        self.k = 3
+        self.k = 2
         self.retrieval_list = ["Dense Retrieval", "Sparse Retrieval", "Hybrid Search", "RetrievalQA"]
         self.chain_types = ["stuff", "refine", "map_reduce", "map_re_rank"]
         #The following indices involve a different retrieval process
         self.index_with_chunks = ["distilroberta", "e5-base-v2"]
 
+    
+
     # The controller takes the retrieval strategy that was requested from front-end and decides which function to call corespondingly
     def controller(self, retrieval_strategy, embedding, question, index):
+
+        if(self.checkQuery(question)):
+            return None, None
+        
         if(retrieval_strategy == self.retrieval_list[0]):
             print("########### Retrieval: Dense Retrieval")
             return self.denseRetrieval(embedding, index)
@@ -37,14 +44,24 @@ class OpenSearchManager:
             print("########### ERetrieval: Hybrid Search")
             return self.hybridSearch(question,embedding, index)
 
-        # if(retrieval_strategy == self.retrieval_list[3]):
+        # if(retrieval_strategy == self.retrieval_list[1]):
         #     print("########### Retrieval: RetrievalQA")
         #     return self.retrievalQA(question, index, chain_type)
+    
+    #if one of these key phrases is inside the query it strogly suggests that we dont need an IR
+    def checkQuery(self, question):
+        non_IR_keyphrase = ["your last answer", "thank you", "summarize it", "make it shorter", "rephrase it", "say it again"] 
+        for keyword in non_IR_keyphrase:
+            ratio = fuzz.ratio(question, keyword)
+            #ratio of 80 mean a moderate match, 100 would mean completley strict match
+            print("FUZZYWUZZY YUUUUUUUU", ratio)
+            if ratio >= 80:                             
+                return False
 
     def denseRetrieval(self ,embedding, index):
         if index in self.index_with_chunks:
             self.k = 10
-        else: self.k = 3
+        else: self.k = 2
         knn_search_body = {
         "size": self.k,  # Number of nearest neighbors to retrieve
             "query": {
@@ -66,7 +83,7 @@ class OpenSearchManager:
     def sparseRetrieval(self ,question, index):
         if index in self.index_with_chunks:
             self.k = 10
-        else: self.k = 3
+        else: self.k = 2
         text_search_body = {
         "size" : self.k,
         "query": {
@@ -83,7 +100,9 @@ class OpenSearchManager:
     def hybridSearch(self, question,embedding, index):
         if index in self.index_with_chunks:
             self.k = 10
-        else: self.k = 3
+        else: self.k = 2
+        print(question)
+        print(embedding)
         route = f"/{index}/_search?search_pipeline=nlp_search-pipeline"
 
         hybrid_search_body = {
