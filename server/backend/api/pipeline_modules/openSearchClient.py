@@ -24,14 +24,12 @@ class OpenSearchManager:
         #The following indices involve a different retrieval process
         self.index_with_chunks = ["distilroberta", "e5-base-v2"]
 
-    
-
     # The controller takes the retrieval strategy that was requested from front-end and decides which function to call corespondingly
     def controller(self, retrieval_strategy, embedding, question, index):
 
         if(self.checkQuery(question)):
             return None, None
-        
+
         if(retrieval_strategy == self.retrieval_list[0]):
             print("########### Retrieval: Dense Retrieval")
             return self.denseRetrieval(embedding, index)
@@ -47,7 +45,7 @@ class OpenSearchManager:
         # if(retrieval_strategy == self.retrieval_list[1]):
         #     print("########### Retrieval: RetrievalQA")
         #     return self.retrievalQA(question, index, chain_type)
-    
+
     #if one of these key phrases is inside the query it strogly suggests that we dont need an IR
     def checkQuery(self, question):
         non_IR_keyphrase = ["your last answer", "thank you", "summarize it", "make it shorter", "rephrase it", "say it again"] 
@@ -55,7 +53,7 @@ class OpenSearchManager:
             ratio = fuzz.ratio(question, keyword)
             #ratio of 80 mean a moderate match, 100 would mean completley strict match
             print("FUZZYWUZZY YUUUUUUUU", ratio)
-            if ratio >= 80:                             
+            if ratio >= 80:
                 return False
 
     def denseRetrieval(self ,embedding, index):
