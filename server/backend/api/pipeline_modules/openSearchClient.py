@@ -129,7 +129,7 @@ class OpenSearchManager:
     #     return rag_pipeline(query)
 
     #private
-    def extractTextFromResponse(self, response):
+    def extractTextFromResponse(self, response, index):
         context = []
         if index in self.index_with_chunks:
             for _, doc in enumerate(response['hits']['hits']):
