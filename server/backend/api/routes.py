@@ -22,7 +22,7 @@ openSearch = openSearchClient.OpenSearchManager()
 embed = embedding_config.EmbeddingManager()
 
 #------------Configuration Options------------
-llm_list = ["GPT 3.5 Turbo 0125", "LLAMA-2-7b-chat-hf", "Azure-Biobert-Pubmed-QA", "Conversational GPT 3.5 Turbo 0125"]
+llm_list = ["GPT 3.5 Turbo 0125", "GPT 3.5 Turbo 0125 (Langchain)", "LLAMA-2-7b-chat-hf", "Azure-Biobert-Pubmed-QA"]
 retrieval_list = ["Dense Retrieval", "Sparse Retrieval", "Hybrid Search"]
 chain_types = ["stuff", "refine", "map_reduce", "map_re_rank"]
 
@@ -80,15 +80,17 @@ def testAzure():
 
 @router.post("/pipeline")
 def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_strategy:str= Body(..., embed=True),
-                             index:str= Body(..., embed=True),llm:str= Body(..., embed=True), citation:str= Body(..., embed=True),
-                             qt:str= Body(..., embed=True), chain_type:str= Body(..., embed=True)):
+                             index:str= Body(..., embed=True),llm:str= Body(..., embed=True), QueryTransformation:str= Body(..., embed=True),chainType:str= Body(..., embed=True)):
+  
+  #Check Config
+  print(f"##### \n Configuration: \n Retrieval:{retrieval_strategy} \n LLM:{llm} \n Embedding: {index} \n QueryTransformation: {QueryTransformation} \n ChainType: {chainType}\n#####" )
 
   checking_availability, err = vector.update_index_model(index)
   if checking_availability == False:
     return err
 
-  # Query Transformation
-  if qt == "true":
+  # Query Transformatio
+  if QueryTransformation == "true":
     # Perform Query Transformation
     query_transform_questions = gpt3.queryTransformation(question, vector)
 
@@ -103,24 +105,20 @@ def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_str
     embedded_query = embed.controller(question, retrieval_strategy, index) # Index corresponds to the vector space in opensearch since we have one index per embedding model
 
     #Retrieve Data
-    context, source = openSearch.controller(retrieval_strategy, embedded_query, question, index)
+    context = openSearch.controller(retrieval_strategy, embedded_query, question, index)
 
   #Generate Answer based on requested LLM
   if llm == llm_list[0]:
     answer = gpt3.query(question, context)
 
-  #elif llm == llm_list[1]:
-  #  answer = llama7b.query(question, context)
+  elif llm == llm_list[1]:
+   answer = retrievalQA.query(question, vector, chain_type=chainType)
 
-  elif llm == llm_list[2]:
-    answer = azure.query(question, context)
+  # elif llm == llm_list[2]:
+  #   answer = llama7b.query(question, context)
 
   elif llm == llm_list[3]:
-    answer = retrievalQA.query(question, vector, chain_type=chain_type)
-
-  # Send Citation
-  if citation == "true":
-    answer = f"{answer} (Citation: {source})"
-
+    answer = azure.query(question, context)
+    
   return answer
 

@@ -47,7 +47,7 @@ class OpenSearchManager:
         non_IR_keyphrase = ["your last answer", "thank you", "summarize it", "make it shorter", "rephrase it", "say it again"] 
         for keyword in non_IR_keyphrase:
             ratio = fuzz.ratio(question, keyword)
-            #ratio of 80 mean a moderate match, 100 would mean completley strict match
+            #ratio of 80 mean a moderate match,  100 would mean completley strict match
             if ratio >= 80:
                 return False
 

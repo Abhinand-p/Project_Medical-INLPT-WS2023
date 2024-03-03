@@ -13,52 +13,7 @@ import React, { useState, useEffect } from "react";
 
 //**This component is by default present on all pages*/
 const Wrapper = () => {
-  const [serverStatus, setServerStatus] = useState("checking...");
 
-  useEffect(() => {
-    const checkHealth = async () => {
-      try {
-        const checkIfBackendIsUpRequest = new Request(
-          "http://127.0.0.1:8000/healthcheck",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              text: "healthy",
-            }),
-          }
-        );
-
-        const response = await fetch(checkIfBackendIsUpRequest);
-
-        if (response.ok) {
-          const data = await response.json();
-          // Assuming your healthcheck returns 'healthy' if things are good
-          if (data === "healthy") {
-            setServerStatus("server is up");
-          } else {
-            setServerStatus("server is down");
-          }
-        } else {
-          setServerStatus("server is down");
-        }
-      } catch (error) {
-        console.error("Healthcheck error:", error);
-        setServerStatus("server is down");
-      }
-    };
-
-    // Initial check
-    checkHealth();
-
-    // Repeated check every 5 seconds
-    const intervalId = setInterval(checkHealth, 5000);
-
-    // Cleanup function (important to prevent memory leaks when the component unmounts)
-    return () => clearInterval(intervalId);
-  }, []);
 
   return (
     <>
@@ -155,12 +110,6 @@ const Wrapper = () => {
                 </ListItemButton>
               </ListItem>
             </Link>
-
-            <ListItem>
-              <ListItemButton>
-                <ListItemIcon>{serverStatus}</ListItemIcon>
-              </ListItemButton>
-            </ListItem>
           </List>
 
           <List

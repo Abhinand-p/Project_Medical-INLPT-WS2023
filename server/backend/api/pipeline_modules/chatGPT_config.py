@@ -73,6 +73,7 @@ class GPTManager:
             ))
         #Check if GPT-3.5 cannot find any data on the given context, then do not add it to the history
         answer = self.chat(self.messages).content
+        print(answer)
         if not self.utils.extract_context(answer):
             self.history.append(AIMessage(content=answer))
             self.utils.save_conversation(self.history)
@@ -117,6 +118,7 @@ class GPTManager:
 
     # Query Transformation
     def queryTransformation(self, query, vector: VectorStoreManager):
+        print("########/#/#/#/:" ,query, vector)
         list_questions = []
 
         output_parser = LineListOutputParser()
@@ -215,3 +217,7 @@ class GPTManager:
     def unzip_file(self, zip_path, extract_path):
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(extract_path)
+
+
+
+  
