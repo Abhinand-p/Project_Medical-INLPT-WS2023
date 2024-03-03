@@ -76,14 +76,14 @@ services:
     image: hrida/light
     container_name: back_end_light
     environment:
-      - OPENAI_API_KEY = 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
-      - HF_AUTH = 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
-      - VOYAGE_API_KEY = pa-3xpcuUhVVgmOQPDBiG7ObYUA58rGn1eB1ZMaowr5xy0
-      - AZURE_SUBSCRIPTION_KEY = 5eec2903-9705-470a-835a-0221fbc8d93d
-      - RESOURCE_GROUP_NAME = inlpt
-      - WORKSPACE_NAME = MLINLPT
-      - ONLINE_ENDPOINT_NAME = biobert-pubmed-qa
-      - DEPLOYMENT_NAME = nlpt-biobert
+      - OPENAI_API_KEY=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
+      - HF_AUTH=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
+      - VOYAGE_API_KEY=pa-3xpcuUhVVgmOQPDBiG7ObYUA58rGn1eB1ZMaowr5xy0
+      - AZURE_SUBSCRIPTION_KEY=5eec2903-9705-470a-835a-0221fbc8d93d
+      - RESOURCE_GROUP_NAME=inlpt
+      - WORKSPACE_NAME=MLINLPT
+      - ONLINE_ENDPOINT_NAME=biobert-pubmed-qa
+      - DEPLOYMENT_NAME=nlpt-biobert
     hostname: light
     volumes:
       - ~/.azure:/root/.azure

@@ -81,7 +81,7 @@ def testAzure():
 @router.post("/pipeline")
 def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_strategy:str= Body(..., embed=True),
                              index:str= Body(..., embed=True),llm:str= Body(..., embed=True), QueryTransformation:str= Body(..., embed=True),chainType:str= Body(..., embed=True)):
-  
+
   #Check Config
   print(f"##### \n Configuration: \n Retrieval:{retrieval_strategy} \n LLM:{llm} \n Embedding: {index} \n QueryTransformation: {QueryTransformation} \n ChainType: {chainType}\n#####" )
 
@@ -112,13 +112,13 @@ def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_str
     answer = gpt3.query(question, context)
 
   elif llm == llm_list[1]:
-   answer = retrievalQA.query(question, vector, chain_type=chainType)
+    answer = retrievalQA.query(question, vector, chainType)
 
   # elif llm == llm_list[2]:
   #   answer = llama7b.query(question, context)
 
   elif llm == llm_list[3]:
     answer = azure.query(question, context)
-    
+
   return answer
 

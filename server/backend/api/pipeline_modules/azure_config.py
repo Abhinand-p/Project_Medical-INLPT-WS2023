@@ -12,14 +12,14 @@ from azure.keyvault.secrets import SecretClient
 class AzureManager:
     def __init__(self):
         load_dotenv()
+        self.msg = ""
         try:
-            credential = DefaultAzureCredential()
-            credential.get_token("https://management.azure.com/.default")
-        except Exception as ex:
-            credential = InteractiveBrowserCredential()
-            #return ex
+            try:
+                credential = DefaultAzureCredential()
+                credential.get_token("https://management.azure.com/.default")
+            except Exception as ex:
+                credential = InteractiveBrowserCredential()
 
-        try:
             self.workspace_ml_client = MLClient(
                 credential,
                 subscription_id= os.getenv("AZURE_SUBSCRIPTION_KEY"),
@@ -45,7 +45,7 @@ class AzureManager:
             self.workspace_ml_client.begin_create_or_update(self.online_endpoint_name).result()
         except Exception as ex:
             print(ex)
-            return ex
+            self.msg = ex
 
     def query(self, question, context):
         question = question.replace("'", "\\'").replace('"', '\\"')
@@ -79,3 +79,6 @@ class AzureManager:
 
         # return the answer with the highest score
         return response_df.loc[response_df['score'].idxmax()]['answer']
+
+    def azure_test(self):
+        return self.workspace_ml_client.info()
