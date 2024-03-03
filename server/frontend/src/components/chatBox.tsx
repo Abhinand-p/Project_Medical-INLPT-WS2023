@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   TextField,
@@ -16,6 +16,7 @@ import {
 import { Slider, FormControlLabel, Switch } from "@mui/material";
 import { padding, styled } from "@mui/system";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import { setServers } from "dns";
 type MessageType = {
   text: string;
   type: "user" | "assistant";
@@ -32,8 +33,10 @@ const CustomWidthTooltip = styled(({ className, ...props }: TooltipProps) => (
 });
 
 const ChatComponent: React.FC = () => {
+  //Save mesages in chat UI
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [newMessage, setNewMessage] = useState<string>("");
+
 
   // These are so that the selected option in dropdown stays mounted
   // These are send to backend to configure pipeline
@@ -43,8 +46,15 @@ const ChatComponent: React.FC = () => {
   const [disableSelectIndex, setDisableSelectIndex] = useState<boolean>(false);
   const [openSearchIndices, setOpenSearchIndices] =
     useState<string>("voyage-2-large");
+  const [chain_type, setChain_type] = useState<string>("");
 
   //These are to catch the currently selected dropdown choice
+  const handleDropdownChange_chain_type = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setChain_type(event.target.value);
+  };
+
   const handleDropDownChange_llm = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
@@ -72,10 +82,13 @@ const ChatComponent: React.FC = () => {
   const [retrievalStrategies_list, setRetrievalStrategies_list] = useState<[]>(
     []
   );
+  const [chain_types_list, setChainTypeList] = useState<[]>(
+    []
+  );
   const [openSearchIndices_list, setOpenSearchIndices_list] = useState<[]>([]);
 
-  // For citation slider
-  const [citationActive, setCitationActive] = useState(true);
+  // For QueryTransformation slider
+  const [QueryTransformationActive, setQueryTransformationActive] = useState(false);
 
   // Function to toggle visibility of advanced mode
   const [showBox, setShowBox] = useState(false); // Initial state: hidden
@@ -96,69 +109,120 @@ const ChatComponent: React.FC = () => {
     setShowBox(!showBox);
   };
 
-  // Query available pipeline config when page loads for the first time
-  useEffect(() => {
-    const requestIndices = new Request(
-      "http://127.0.0.1:8000/getOpenSearchIndices",
-      {
-        method: "GET",
-      }
-    );
-    async function getIndicies(this: any) {
-      try {
-        const response = await fetch(requestIndices);
-        const data = await response.json();
-        setOpenSearchIndices_list(data);
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    const requestLLm = new Request("http://127.0.0.1:8000/getLLMs", {
+  const requestIndices = new Request(
+    "http://127.0.0.1:8000/getOpenSearchIndices",
+    {
       method: "GET",
-    });
-    async function getLLMs(this: any) {
-      try {
-        const response = await fetch(requestLLm);
-        const data = await response.json();
-        setllms_list(data);
-      } catch (error) {
-        console.log(error);
-      }
     }
-    const requestRetrievalStrategy = new Request(
-      "http://127.0.0.1:8000/getRetrievalStrategy",
-      {
-        method: "GET",
-      }
-    );
-    async function getRetrievalStrategy(this: any) {
-      try {
-        const response = await fetch(requestRetrievalStrategy);
-        const data = await response.json();
-        setRetrievalStrategies_list(data);
-      } catch (error) {
-        console.log(error);
-      }
+  );
+  async function getIndicies(this: any) {
+    try {
+      const response = await fetch(requestIndices);
+      const data = await response.json();
+      setOpenSearchIndices_list(data);
+    } catch (error) {
+      console.log(error);
     }
-    const checkIfBackendIsUpRequest = new Request(
-      "http://127.0.0.1:8000/healthcheck",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text: "yes",
-        }),
-      }
-    );
+  }
+  const requestLLm = new Request("http://127.0.0.1:8000/getLLMs", {
+    method: "GET",
+  });
+  async function getLLMs(this: any) {
+    try {
+      const response = await fetch(requestLLm);
+      const data = await response.json();
+      setllms_list(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
-    setTimeout(() => {
-      getIndicies();
-      getLLMs();
-      getRetrievalStrategy();
-    }, 8000);
-  }, []);
+  const requestRetrievalStrategy = new Request(
+    "http://127.0.0.1:8000/getRetrievalStrategy",
+    {
+      method: "GET",
+    }
+  );
+  async function getRetrievalStrategy(this: any) {
+    try {
+      const response = await fetch(requestRetrievalStrategy);
+      const data = await response.json();
+      setRetrievalStrategies_list(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const requestChainTypes = new Request(
+    "http://127.0.0.1:8000/getChainTypes",
+    {
+      method: "GET",
+    }
+  );
+  async function getChainTypes(this: any) {
+    try {
+      const response = await fetch(requestChainTypes);
+      const data = await response.json();
+      setChainTypeList(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+
+  const [serverStatus, setServerStatus] = useState<string>("checking ...");
+
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        const checkIfBackendIsUpRequest = new Request(
+          "http://127.0.0.1:8000/healthcheck",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              text: "healthy",
+            }),
+          }
+        );
+
+        const response = await fetch(checkIfBackendIsUpRequest);
+
+        if (response.ok) {
+          const data = await response.json();
+          // Assuming your healthcheck returns 'healthy' if things are good
+          if (data === "healthy") {
+            setServerStatus("healthy")
+            getIndicies()
+            getLLMs()
+            getRetrievalStrategy()
+            getChainTypes()
+          } else {
+            setServerStatus("server is down");
+          }
+        } else {
+          setServerStatus("server is down");
+        }
+      } catch (error) {
+        console.error("Healthcheck error:", error);
+        setServerStatus("server is down");
+      }
+    };
+
+    // Initial check
+
+    checkHealth();
+    
+
+    // Repeated check every 5 seconds
+    const intervalId = setInterval(checkHealth, 5000);
+
+    // Cleanup function (important to prevent memory leaks when the component unmounts)
+    return () => clearInterval(intervalId);
+  }, [serverStatus]);
+  
 
   const request = new Request("http://127.0.0.1:8000/pipeline", {
     method: "POST",
@@ -170,7 +234,8 @@ const ChatComponent: React.FC = () => {
       retrieval_strategy: retrievalStrategies,
       index: openSearchIndices,
       llm: llms,
-      citation: String(citationActive),
+      QueryTransformation: String(QueryTransformationActive),
+      chainType:  chain_type
     }),
   });
 
@@ -210,7 +275,9 @@ const ChatComponent: React.FC = () => {
 
   return (
     <>
-      <Box
+    {serverStatus === "healthy" ? (
+      <>
+            <Box
         sx={{
           display: "flex",
           flexDirection: "column",
@@ -323,8 +390,8 @@ const ChatComponent: React.FC = () => {
             marginLeft: "10px",
           }}
         >
-          {openSearchIndices_list.length !== 0 ? (
-            <>
+
+            
               <div className="dropdown">
                 <select
                   id="dropdown1"
@@ -364,6 +431,24 @@ const ChatComponent: React.FC = () => {
                   ))}
                 </select>
               </div>
+
+              {llms === "Conversational GPT 3.5 Turbo 0125" && (
+              <div className="dropdown">
+                <select
+                  id="dropdown4"
+                  value={chain_type}
+                  onChange={handleDropdownChange_chain_type}
+                >
+                  <option value="">Select a chain type</option>
+                  {chain_types_list.map((item) => (
+                    <option value={item}>{item}</option>
+                  ))}
+                </select>
+              </div>
+              )}
+
+              <CustomWidthTooltip title="Query transformation refines your questions for more accurate answers. Turn it on to improve your search experience!" arrow
+                  placement="bottom">
               <div>
                 <FormControlLabel
                   sx={{
@@ -371,16 +456,17 @@ const ChatComponent: React.FC = () => {
                   }}
                   control={
                     <Switch
-                      checked={citationActive}
+                      checked={QueryTransformationActive}
                       onChange={() => {
-                        setCitationActive(!citationActive);
-                        console.log("Source Mode: ", citationActive);
+                        setQueryTransformationActive(!QueryTransformationActive);
+                        console.log("Query Transformation: ", QueryTransformationActive);
                       }}
                     />
                   }
-                  label="Source Mode"
+                  label="Query Transformation"
                 />
               </div>
+              </CustomWidthTooltip>
               <Box sx={{ paddingLeft: "5px" }}>
                 <CustomWidthTooltip
                   arrow
@@ -392,20 +478,21 @@ const ChatComponent: React.FC = () => {
                   </IconButton>
                 </CustomWidthTooltip>
               </Box>
-            </>
-          ) : (
-            <CircularProgress
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                top: "50%",
-                left: "80%",
-              }}
-            />
-          )}
+          
         </Box>
       )}
+      </>
+    ): (
+      <Box sx={{     position: 'fixed', /* Position relative to the viewport */
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)' }}>
+         <CircularProgress sx= {{marginLeft: "30px"}}/>
+         <h1>Loading...</h1>      </Box>
+       
+      
+    )}
+
     </>
   );
 };
