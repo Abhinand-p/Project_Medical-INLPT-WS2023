@@ -9,7 +9,7 @@ class OpenSearchManager:
         self.utils = Utils()
         host = 'opensearch-node1' #'localhost'
         # port = 9200
-        auth = ('admin', '!akjdaDsdoij!oijadSsajd123120938')
+        auth = ('admin', 'admin')
 
         self.client = OpenSearch(
             hosts = [{'host': host}], # 'port': port
