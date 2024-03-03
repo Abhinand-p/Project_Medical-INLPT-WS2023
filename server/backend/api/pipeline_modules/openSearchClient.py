@@ -7,7 +7,7 @@ class OpenSearchManager:
 
     def __init__(self):
         self.utils = Utils()
-        host = 'opensearch-node1' #'localhost'
+        host = 'localhost' #'localhost'
         # port = 9200
         auth = ('admin', 'admin')
 

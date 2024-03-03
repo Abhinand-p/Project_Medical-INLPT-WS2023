@@ -55,7 +55,14 @@ const ChatComponent: React.FC = () => {
   const handleDropDownChange_llm = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    setllms(event.target.value);
+    checkAzure()
+    if(AzureReady == "true"){
+      setllms(event.target.value);
+    }
+    else{
+      alert("Azure Model is unavailable, please reach out to your System Administrator!");
+    }
+    
   };
   const handleDropdownChange_retrieval = (
     event: React.ChangeEvent<HTMLSelectElement>
@@ -94,6 +101,9 @@ const ChatComponent: React.FC = () => {
   //Indiator for user that he should wait for LLM response
   const [loading, setLoading] = useState(false);
 
+  //check if azure is ready
+  const [AzureReady, setAzureReady] = useState<String>("false");
+
   const AdvancedMode = () => {
     //When Advanced mode is activated remove default values, if deactivated turn them back on
     if (showBox == false) {
@@ -109,6 +119,22 @@ const ChatComponent: React.FC = () => {
 
     setShowBox(!showBox);
   };
+  // Check if Azure is ready
+  const requestCheckAzure = new Request(
+    "http://127.0.0.1:8000/testAzure",
+    {
+      method: "GET",
+    }
+  );
+  async function checkAzure(this: any) {
+    try {
+      const response = await fetch(requestCheckAzure);
+      const data = await response.json();
+      setAzureReady(data)
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const requestIndices = new Request(
     "http://127.0.0.1:8000/getOpenSearchIndices",

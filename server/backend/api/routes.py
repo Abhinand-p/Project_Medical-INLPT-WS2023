@@ -76,7 +76,7 @@ def getChainTypes():
 
 @router.get("/testAzure")
 def testAzure():
-  return azure.query("What is the capital of France?", "Paris is the capital of France.")
+  return azure.azure_status()
 
 @router.post("/pipeline")
 def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_strategy:str= Body(..., embed=True),

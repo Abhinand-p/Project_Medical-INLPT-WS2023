@@ -80,5 +80,8 @@ class AzureManager:
         # return the answer with the highest score
         return response_df.loc[response_df['score'].idxmax()]['answer']
 
-    def azure_test(self):
+    def azure_info(self):
         return self.workspace_ml_client.info()
+
+    def azure_status(self):
+        return "true" if self.msg == "" else "false"
