@@ -20,8 +20,9 @@ openSearch = openSearchClient.OpenSearchManager()
 embed = embedding_config.EmbeddingManager()
 
 #------------Configuration Options------------
-llm_list = ["GPT 3.5 Turbo 0125", "LLAMA-2-7b-chat-hf", "Azure-QA-Conversational", "RetrievalQA"]
+llm_list = ["GPT 3.5 Turbo 0125", "LLAMA-2-7b-chat-hf", "Azure-Biobert-Pubmed-QA", "Conversational GPT 3.5 Turbo 0125"]
 retrieval_list = ["Dense Retrieval", "Sparse Retrieval", "Hybrid Search"]
+chain_types = ["stuff", "refine", "map_reduce", "map_re_rank"]
 
 
 #------------Routes------------
@@ -29,13 +30,14 @@ retrieval_list = ["Dense Retrieval", "Sparse Retrieval", "Hybrid Search"]
 async def mirror(text: str = Body(..., embed= True)):
   return text
 
-
 @router.get("/getOpenSearchIndices")
 def getIndices():
   #Filter out default Indices that are always present
   defaultIndices = set( [".plugins-ml-config",".opensearch-observability",".opensearch-sap-log-types-config",".opendistro_security"])
   allIndices = openSearch.getAllIndices()
+
   filtered_list = [item for item in allIndices if item not in defaultIndices]
+
   #Filter out security logs
   filtered_list = [string for string in filtered_list if "security" not in string]
   return filtered_list
@@ -48,27 +50,33 @@ def getLLM():
 def getRetrieval():
   return retrieval_list
 
+@router.get("/getChainTypes")
+def getChainTypes():
+  return chain_types
+
 @router.post("/pipeline")
 def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_strategy:str= Body(..., embed=True),
-                 index:str= Body(..., embed=True),llm:str= Body(..., embed=True), citation:str= Body(..., embed=True), 
-                 qt:str= Body(..., embed=True), chain_type:str= Body(..., embed=True)):
+                             index:str= Body(..., embed=True),llm:str= Body(..., embed=True), citation:str= Body(..., embed=True),
+                             qt:str= Body(..., embed=True), chain_type:str= Body(..., embed=True)):
 
-  # Query Transformation <<<<<<<<<< TODO: add a function on the frontend that allows the user to select QT strategy and the LLM and this would be only allowed with CHATGPT
+  checking_availability, err = vector.update_index_model(index)
+  if checking_availability == False:
+    return err
+
+  # Query Transformation
   if qt == "true":
-    context_list = []
-
     # Perform Query Transformation
     query_transform_questions = gpt3.queryTransformation(question, vector)
 
     for generated_query in query_transform_questions:
       # Embed the query transformed question
-      embedded_query= embed.controller(generated_query, retrieval_strategy, index)
+      embedded_query = embed.controller(generated_query, retrieval_strategy, index)
 
       # Retrieve the data for the query transformed question with a retrieval strategy
-      context_list.append(openSearch.controller(retrieval_strategy, embedded_query, question, index))
+      context += openSearch.controller(retrieval_strategy, embedded_query, question, index) + ". " # Concatenate the context for each query transformed question
   else:
     #Embed query
-    embedded_query = embed.controller(question, retrieval_strategy, index) #Index corresponds to embedding model since we have one index per mbedding model
+    embedded_query = embed.controller(question, retrieval_strategy, index) # Index corresponds to the vector space in opensearch since we have one index per embedding model
 
     #Retrieve Data
     context, source = openSearch.controller(retrieval_strategy, embedded_query, question, index)
@@ -84,7 +92,7 @@ def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_str
     answer = azure.query(question, context)
 
   elif llm == llm_list[3]:
-    answer = retrievalQA.retrievalChain(question, llm, vector=vector, chain_type=chain_type)
+    answer = retrievalQA.conversationalRetrievalChain(question, vector, chain_type=chain_type)
 
   # Send Citation
   if citation == "true":

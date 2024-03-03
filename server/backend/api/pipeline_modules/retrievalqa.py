@@ -1,20 +1,37 @@
-from vector_store import VectorStoreManager
-from langchain.chains import RetrievalQA
-
+from .vector_store import VectorStoreManager
+from langchain.chat_models import ChatOpenAI
+from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory
+import os
 class RetrievalQAManager:
     def __init__(self) -> None:
-        self.chain_types = ["stuff", "refine", "map_reduce", "map_re_rank"]
-        pass
+        try:
+            api_key = os.getenv("OPENAI_API_KEY") # "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" 
+            if api_key is None:
+                raise ValueError("OPENAI_API_KEY is not set in the environment variables. Please set it and restart the server.")
+            else:
+                self.llm = ChatOpenAI(api_key=api_key, model='gpt-3.5-turbo-0125')
+                self.memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True, output_key='answer')
 
-    def retrievalChain(self, question, index, vector: VectorStoreManager, chain_type):
+            self.qa_dict = dict()
+
+        except Exception as varname:
+            print(varname)
+
+    def get_qa(self, vector: VectorStoreManager, chain_type):
+        if chain_type not in self.qa_dict:
+            self.qa_dict[chain_type] = ConversationalRetrievalChain.from_llm(llm=self.llm,
+                                                                             retriever=vector.db.as_retriever(search_kwargs={"k":2}),
+                                                                             chain_type = chain_type,
+                                                                             memory=self.memory)
+        return self.qa_dict[chain_type]
+
+    def conversationalRetrievalChain(self, question, vector: VectorStoreManager, chain_type):
         if chain_type == "":
             chain_type = "stuff"
 
-        qa_chain = RetrievalQA.from_chain_type(llm=index,
-                                                chain_type=chain_type,
-                                                verbose=True,
-                                                retriever=vector.db.as_retriever(search_kwargs={"k":5}),
-                                                chain_type_kwargs={"verbose": False })
-        result = qa_chain({"query": question})
-        return result["result"]
+        qa_conversation = self.get_qa(vector, chain_type)
 
+        result = qa_conversation({"query": question})
+
+        return result["result"]

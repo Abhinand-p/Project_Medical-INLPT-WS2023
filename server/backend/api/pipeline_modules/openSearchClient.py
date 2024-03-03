@@ -127,7 +127,7 @@ class OpenSearchManager:
             }
         }
         }
-        response  = self.client.transport.perform_request(method = "GET", url = route, body = hybrid_search_body) 
+        response  = self.client.transport.perform_request(method = "GET", url = route, body = hybrid_search_body)
         context = self.extractTextFromResponse(response,index)
         return context
 

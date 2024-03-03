@@ -6,22 +6,18 @@ from langchain_openai import ChatOpenAI
 from langchain.chat_models import ChatOpenAI as chatAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-from langchain. retrievers.multi_query import MultiQueryRetriever
+from langchain.retrievers.multi_query import MultiQueryRetriever
 from utils import LineList, LineListOutputParser
-from langchain.schema import (
-    SystemMessage,
-    HumanMessage,
-    AIMessage
-)
+from langchain.schema import (SystemMessage, HumanMessage, AIMessage)
 from dotenv import load_dotenv
 import os
 from utils import Utils
-from chatGPT_config import GPTManager
-from vector_store import VectorStoreManager
 import logging
 import numpy as np
 from langchain.chains import RetrievalQA
-from vector_store import VectorStoreManager
+from .vector_store import VectorStoreManager
+import urllib.request
+import zipfile
 
 systemPrompts = {
     "system_prompt1" : "You are a researcher on Medical Intelligence, that can answer questions based on the provided articles.",
@@ -31,32 +27,34 @@ systemPrompts = {
 class GPTManager:
 
     def __init__(self):
-        load_dotenv()
-        self.utils = Utils()
-        api_key = "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" # os.getenv("OPENAI_API_KEY")
-        if api_key is None:
-            raise ValueError("OPENAI_API_KEY is not set")
-        else:
-            self.chat = ChatOpenAI(api_key=api_key, model='gpt-3.5-turbo-0125')
+        try:
+            load_dotenv()
+            self.utils = Utils()
+            api_key = os.getenv("OPENAI_API_KEY") # "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"
 
-            # Using this model for RetrievalQA
-            self.chain = RetrievalQA.from_chain_type(self.chat, retriever=vectorstore.as_retriever(), chain_type_kwargs={"prompt": prompt})
+            if api_key is None:
+                raise ValueError("OPENAI_API_KEY is not set in the environment variables. Please set it and restart the server.")
+            else:
+                self.chat = ChatOpenAI(api_key=api_key, model='gpt-3.5-turbo-0125')
 
-            # Using chatOpenAI model for query transformation
-            self.chatAIBot = chatAI(api_key=api_key, model='gpt-3.5-turbo-0125')
+                # Using chatOpenAI model for query transformation
+                self.chatAIBot = chatAI(api_key=api_key, model='gpt-3.5-turbo-0125')
 
-            # Using the Glove model for semantic similarity computation of the queries
-            self.word_to_vec = self.load_glove_model("glove.6B.50d.txt")
+                # Using the Glove model for semantic similarity computation of the queries
+                self.word_to_vec = self.load_glove_model("glove.6B.50d.txt")
 
-        self.messages  = [SystemMessage(systemPrompts["system_prompt1"])]
-        self.history = []
+                self.messages  = [SystemMessage(systemPrompts["system_prompt1"])]
+                self.history = []
 
-        # Set logging for the queries
-        logging.basicConfig()
-        self.logger  = logging.getLogger("langchain.retrievers.multi_query")
-        self.logger.setLevel(logging.INFO)
-        file_handler = logging.FileHandler('logfile.log')
-        self.logger.addHandler(file_handler)
+                # Set logging for the queries
+                logging.basicConfig()
+                self.logger  = logging.getLogger("langchain.retrievers.multi_query")
+                self.logger.setLevel(logging.INFO)
+                file_handler = logging.FileHandler('logfile.log')
+                self.logger.addHandler(file_handler)
+        except Exception as varname:
+            print(varname)
+
 
     def query(self, question, context):
         print("###########  LLM: GPT")
@@ -82,12 +80,12 @@ class GPTManager:
             #     SystemMessage(
             #         content = answer
             #     ))
-            self.messages.append(
-            AIMessage(
-                content=answer
-            ))
+
+            self.messages.append(AIMessage(content=answer))
+
             print(self.messages)
             #Make sure Hat history wont get too big
+
             self.chatHistoryHousekeeping()
             return answer
         else:
@@ -117,6 +115,7 @@ class GPTManager:
 
                 self.messages[id] = HumanMessage(newHumanMessage)
 
+    # Query Transformation
     def queryTransformation(self, query, vector: VectorStoreManager):
         list_questions = []
 
@@ -154,6 +153,10 @@ class GPTManager:
             if(semantic_similarity_score >= 0.7):
                 selected_questions.append(transformed_query)
 
+        # Handling the case where no question is returned
+        if len(selected_questions) == 0:
+            return query
+
         # Retrive the top 2 questions
         selected_questions = selected_questions[:2]
 
@@ -171,10 +174,19 @@ class GPTManager:
             end_index = message.index("']") + 2
             queries_str = message[start_index:end_index]
             queries_list = eval(queries_str)
-
         return queries_list
 
     def load_glove_model(self, glove_file):
+        if not os.path.exists(glove_file): # Check if the GloVe embeddings are already downloaded
+            # Downloading GloVe embeddings
+            print("Downloading GloVe Model")
+            self.download_glove_embedding("http://nlp.stanford.edu/data/glove.6B.zip", "glove.6B.zip")
+
+            # Unzip GloVe embeddings
+            print("Unzipping GloVe Model")
+            self.unzip_file("glove.6B.zip", "./")
+
+        # Load GloVe embeddings
         print("Loading GloVe Model")
         with open(glove_file, 'r', encoding='utf-8') as f:
             word_to_vec = {}
@@ -195,3 +207,11 @@ class GPTManager:
 
         similarity_score = np.dot(query_embedding, transformed_query_embedding) / (np.linalg.norm(query_embedding) * np.linalg.norm(transformed_query_embedding))
         return similarity_score
+
+    # Download GloVe embeddings
+    def download_glove_embedding(self, glove_url, glove_file):
+        urllib.request.urlretrieve(glove_url, glove_file)
+
+    def unzip_file(self, zip_path, extract_path):
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(extract_path)

@@ -7,13 +7,13 @@ from typing import List
 class Utils:
     def __init__(self) -> None:
         pass
-    
+
     def extract_context(self, text):
         # Extract the context from the response of GPT-3.5
         pattern = r"There is no such data on provided Articles"
         matches = re.findall(pattern, text)
         return matches
-    
+
     def save_conversation(self, conversation, Geneartor = 'GPT'):
         # Save the conversation in a file
         if Geneartor == 'GPT':
@@ -26,7 +26,7 @@ class Utils:
             return True
         else:
             return False
-        
+
     def extract_pmid(self, text):
         # Regular expression pattern to extract the PMID
         pattern = r'/(\d+)/?$'
