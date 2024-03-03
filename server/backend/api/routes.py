@@ -24,7 +24,7 @@ embed = embedding_config.EmbeddingManager()
 #------------Configuration Options------------
 llm_list = ["GPT 3.5 Turbo 0125", "GPT 3.5 Turbo 0125 (Langchain)", "LLAMA-2-7b-chat-hf", "Azure-Biobert-Pubmed-QA"]
 retrieval_list = ["Dense Retrieval", "Sparse Retrieval", "Hybrid Search"]
-chain_types = ["stuff", "refine", "map_reduce", "map_re_rank"]
+chain_types = ["stuff", "refine", "map_reduce", "map_rerank"]
 
 
 #------------Routes------------

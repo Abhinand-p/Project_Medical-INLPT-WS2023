@@ -50,20 +50,25 @@ const ChatComponent: React.FC = () => {
   const handleDropdownChange_chain_type = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
+    console.log(llms_list)
     setChain_type(event.target.value);
   };
   const handleDropDownChange_llm = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    checkAzure()
-    if(AzureReady == "true"){
-      setllms(event.target.value);
-    }
-    else{
-      alert("Azure Model is unavailable, please reach out to your System Administrator!");
-    }
+    
+    setllms(event.target.value);
+
     
   };
+
+  useEffect(() => {
+    if(llms == "Azure-Biobert-Pubmed-QA"){
+      alert("The Azure model is not initialized yet, please reach out to your System Administrator and choose a different model!")
+    }
+  }, [llms]); // Dependency array includes only "count"
+
+
   const handleDropdownChange_retrieval = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
