@@ -8,7 +8,7 @@ class VectorStoreManager:
     def __init__(self) -> None:
         host = 'localhost'
         port = 9200
-        auth = ('admin', 'admin')
+        auth = ('admin', '!akjdaDsdoij!oijadSsajd123120938')
 
         #Config mbedding models
         self.index_list = ["voyage-2-large", "text-embedding-3-large","distilroberta", "e5-base-v2"]
