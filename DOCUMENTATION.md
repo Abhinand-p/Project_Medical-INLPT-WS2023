@@ -156,6 +156,26 @@ applications than the baseline. Underpin your points using examples or metrics
 instead of stating unproven claims.)
 
 ## Experimental Details:
+
+### Evaluating our Pipeline
+A RAG pipeline is composed of multiple parts and provides plenty of differen ways on how to configure it. Everyone in our group had different ideas on how to chunk, embed or store the data or which LLM would be best to generate an answer. Thats why it was important for us to have some kind of comparison between all the different configurations. 
+
+In general, evaluating RAG pipelines is hard. You need to assess both how well information is retrieved and how effectively it's used for generation. Additionally, biases in the LLM and the quality of retrieved context can significantly impact the final output. RAGAS (https://github.com/explodinggradients/ragas) stands out here because of its metric-driven approach. It offers a comprehensive suite of metrics for retrieval relevance, factual consistency, and linguistic quality. This allows for targeted optimization based on data, not just guesswork. With RAGAS, one can pinpoint weaknesses and refine his RAG pipeline for better overall performance.
+Another strong strength of RAGAS is its oportunity to create Synthetic Test Data which include Question-Answer (Groundtruth) pairs that can be used for evaluation. We initally tried to create them on our one with different LLMs and sophisticated querries but couldnt manage to bring the data up to a certain quality. RAGAS however provides a usefull framework for that, after providing our textual data, an LLM (GPT 3.5 Turbo) and a configuration about the type of questions, it provided diverse and interesting questions, along with correct answers to them. We created 100 Question-Answer pairs with the following distribution:
+- simple 0.25
+- reasoning: 0.5
+- multi_context: 0.1
+- conditional: 0.15
+
+(See official documentation for more information on question types: https://docs.ragas.io/en/stable/getstarted/testset_generation.html)
+
+When actually assessing the metrics one can either choose to use a custom LLM or to take the default variant which is using openAI's GPT 3.5 Turbo. It turned out using the default option is very cost expensive which is why we tried to use a local llama2-7b-chat-hf instead. This however wasn't feesable aswell since with the amount of questions even our strongest available machine ran of GPU memory (64 GB). So we decided a compromise by using openAI but therefore reducing the number of questions we use for evaluating our pipeline.
+We ran the 30 question-answer pairs through our different pipeline configurations and collected the respective Answers/ retrieved contexts into a new Data set. We then evaluated these over 4 metrics, 2 for the retrieval (Context Relevancy and Recall) and 2 for the generation (Answer Relevancy and Faithfullness): 
+
+![Example Image](EvaluationMethods/ragas/eval_results.pdf)
+
+While both embeding models outperformed the bm25 based baseline, their retrieval metrics for dense retrival and Hybrid Search didn't differ much from each. The reason wh the context Relevancy is rather low comes from the nature of how this metric is assessed. Its the ratio of sentences of the context which exclusively contain essential information about the query to the toal number of sentences in the context. Since the shown approach didn't chunk and crreated one embedding per abstract, depending on the question the context might carry a lot of overhead.
+
 ### Query Transformation Technique:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; We've implemented a query transformation technique within our application, leveraging the LangChain MultiQueryRetriever.
 This approach aims to streamline the process of finding relevant articles within our PubMed dataset by enhancing query generation. 
