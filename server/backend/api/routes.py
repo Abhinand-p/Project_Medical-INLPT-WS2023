@@ -35,7 +35,7 @@ async def mirror(text: str = Body(..., embed= True)):
 @router.get("/getOpenSearchIndices")
 def getIndices():
   #Filter out default Indices that are always present
-  defaultIndices = set( [".plugins-ml-config",".opensearch-observability",".opensearch-sap-log-types-config",".opendistro_security", ".kibana_1"])
+  defaultIndices = set( [".plugins-ml-config",".opensearch-observability",".opensearch-sap-log-types-config",".opendistro_security", ".kibana_1", "sophiaqho-boolq_finetuned_on_pubmed"])
   allIndices = openSearch.getAllIndices()
 
   filtered_list = [item for item in allIndices if item not in defaultIndices]
@@ -93,10 +93,13 @@ def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_str
   if QueryTransformation == "true":
     # Perform Query Transformation
     query_transform_questions = gpt3.queryTransformation(question, vector)
-
+    context = ""
+    embedded_query = ""
     for generated_query in query_transform_questions:
-      # Embed the query transformed question
-      embedded_query = embed.controller(generated_query, retrieval_strategy, index)
+      # Embed the query transformed question (but not if we chose sparse retrieval)
+      
+      if(retrieval_strategy != "Sparse Retrieval"):
+        embedded_query = embed.controller(generated_query, retrieval_strategy, index)
 
       # Retrieve the data for the query transformed question with a retrieval strategy
       context += openSearch.controller(retrieval_strategy, embedded_query, question, index) + ". " # Concatenate the context for each query transformed question

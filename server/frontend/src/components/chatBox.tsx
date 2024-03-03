@@ -12,6 +12,7 @@ import {
   TooltipProps,
   tooltipClasses,
   CircularProgress,
+  LinearProgress,
 } from "@mui/material";
 import { Slider, FormControlLabel, Switch } from "@mui/material";
 import { padding, styled } from "@mui/system";
@@ -38,14 +39,11 @@ const ChatComponent: React.FC = () => {
   const [newMessage, setNewMessage] = useState<string>("");
 
 
-  // These are so that the selected option in dropdown stays mounted
-  // These are send to backend to configure pipeline
+  //Get users configuration which is send to backend
   const [llms, setllms] = useState<string>("GPT 3.5 Turbo 0125");
-  const [retrievalStrategies, setRetrievalStrategies] =
-    useState<string>("Hybrid Search");
+  const [retrievalStrategies, setRetrievalStrategies] = useState<string>("Hybrid Search");
   const [disableSelectIndex, setDisableSelectIndex] = useState<boolean>(false);
-  const [openSearchIndices, setOpenSearchIndices] =
-    useState<string>("voyage-2-large");
+  const [openSearchIndices, setOpenSearchIndices] = useState<string>("voyage-2-large");
   const [chain_type, setChain_type] = useState<string>("");
 
   //These are to catch the currently selected dropdown choice
@@ -54,18 +52,18 @@ const ChatComponent: React.FC = () => {
   ) => {
     setChain_type(event.target.value);
   };
-
   const handleDropDownChange_llm = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
     setllms(event.target.value);
   };
-
   const handleDropdownChange_retrieval = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    if (event.target.value == "Sparse Retrieval") {
+    if (event.target.value == "Sparse Retrieval") { 
       setDisableSelectIndex(true);
+      setOpenSearchIndices("voyage-2-large")
+
     } else {
       setDisableSelectIndex(false);
     }
@@ -93,8 +91,11 @@ const ChatComponent: React.FC = () => {
   // Function to toggle visibility of advanced mode
   const [showBox, setShowBox] = useState(false); // Initial state: hidden
 
+  //Indiator for user that he should wait for LLM response
+  const [loading, setLoading] = useState(false);
+
   const AdvancedMode = () => {
-    //When Advanced mode is activated remove default values, if deactivated
+    //When Advanced mode is activated remove default values, if deactivated turn them back on
     if (showBox == false) {
       setOpenSearchIndices("");
       setRetrievalStrategies("");
@@ -194,11 +195,13 @@ const ChatComponent: React.FC = () => {
           const data = await response.json();
           // Assuming your healthcheck returns 'healthy' if things are good
           if (data === "healthy") {
-            setServerStatus("healthy")
-            getIndicies()
-            getLLMs()
-            getRetrievalStrategy()
-            getChainTypes()
+            if(serverStatus != "healthy"){
+              setServerStatus("healthy")
+              getIndicies()
+              getLLMs()
+              getRetrievalStrategy()
+              getChainTypes()
+            }
           } else {
             setServerStatus("server is down");
           }
@@ -244,7 +247,11 @@ const ChatComponent: React.FC = () => {
       alert("Message can't be empty!");
       return;
     }
-    if (openSearchIndices == "" || retrievalStrategies == "" || llms == "") {
+    if(retrievalStrategies == "Sparse Retrieval" && llms == ""){
+      alert("Complete the Configuration!");
+      return;
+    }
+    if (retrievalStrategies != "Sparse Retrieval" && (openSearchIndices == "" || retrievalStrategies == "" || llms == "")) {
       alert("Complete the Configuration!");
       return;
     }
@@ -254,6 +261,7 @@ const ChatComponent: React.FC = () => {
   async function handleSendMessage() {
     console.log(newMessage);
     setMessages([...messages, { text: newMessage, type: "user" }]);
+    setLoading(true)
     setNewMessage("");
     try {
       const response = await fetch(request);
@@ -261,6 +269,7 @@ const ChatComponent: React.FC = () => {
       console.log(data);
 
       if (response.status === 200) {
+        setLoading(false)
         setMessages((prevMessages: any) => [
           ...prevMessages,
           { text: data, type: "assistant" },
@@ -324,7 +333,11 @@ const ChatComponent: React.FC = () => {
               </ListItem>
             ))}
           </List>
+        
         </Box>
+        {loading &&(
+          <LinearProgress/>
+          )}
         <Box
           sx={{
             display: "flex",
@@ -404,8 +417,8 @@ const ChatComponent: React.FC = () => {
                   ))}
                 </select>
               </div>
-
-              <div className="dropdown">
+              {retrievalStrategies !== "Sparse Retrieval" && (
+                <div className="dropdown">
                 <select
                   id="dropdown2"
                   value={openSearchIndices}
@@ -418,6 +431,8 @@ const ChatComponent: React.FC = () => {
                   ))}
                 </select>
               </div>
+              )}
+              
 
               <div className="dropdown">
                 <select
@@ -432,7 +447,7 @@ const ChatComponent: React.FC = () => {
                 </select>
               </div>
 
-              {llms === "Conversational GPT 3.5 Turbo 0125" && (
+              {llms === "GPT 3.5 Turbo 0125 (Langchain)" && (
               <div className="dropdown">
                 <select
                   id="dropdown4"
@@ -487,7 +502,7 @@ const ChatComponent: React.FC = () => {
       top: '50%',
       left: '50%',
       transform: 'translate(-50%, -50%)' }}>
-         <CircularProgress sx= {{marginLeft: "30px"}}/>
+         <CircularProgress sx= {{marginLeft: "30px", font: "italic"}}/>
          <h1>Loading...</h1>      </Box>
        
       

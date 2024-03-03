@@ -36,7 +36,7 @@ class OpenSearchManager:
 
         if(retrieval_strategy == self.retrieval_list[1]):
             print("########### Retrieval: Sparse Retrieval")
-            return self.sparseRetrieval(question, index)
+            return self.sparseRetrieval(question, "voyage-2-large")
 
         if(retrieval_strategy == self.retrieval_list[2]):
             print("########### ERetrieval: Hybrid Search")
@@ -44,7 +44,7 @@ class OpenSearchManager:
 
     #if one of these key phrases is inside the query it strogly suggests that we dont need an IR
     def checkQuery(self, question):
-        non_IR_keyphrase = ["your last answer", "thank you", "summarize it", "make it shorter", "rephrase it", "say it again"] 
+        non_IR_keyphrase = ["your last answer", "thank you", "summarize it", "make it shorter", "rephrase it", "say it again", "Hello", "How are you?", "Repeat it"] 
         for keyword in non_IR_keyphrase:
             ratio = fuzz.ratio(question, keyword)
             #ratio of 80 mean a moderate match,  100 would mean completley strict match
