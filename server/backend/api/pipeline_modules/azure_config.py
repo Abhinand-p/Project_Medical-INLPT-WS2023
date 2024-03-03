@@ -17,6 +17,7 @@ class AzureManager:
             credential.get_token("https://management.azure.com/.default")
         except Exception as ex:
             credential = InteractiveBrowserCredential()
+            #return ex
 
         try:
             self.workspace_ml_client = MLClient(
@@ -44,6 +45,7 @@ class AzureManager:
             self.workspace_ml_client.begin_create_or_update(self.online_endpoint_name).result()
         except Exception as ex:
             print(ex)
+            return ex
 
     def query(self, question, context):
         question = question.replace("'", "\\'").replace('"', '\\"')

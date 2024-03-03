@@ -14,7 +14,7 @@ class LlamaManager:
             load_dotenv()
             self.utils = Utils()
 
-            hf_auth = "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" # os.getenv("HF_API_KEY")
+            hf_auth =  os.getenv("HF_API_KEY") # "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"
             model_id = 'meta-llama/Llama-2-7b-chat-hf'
 
             if hf_auth is None:

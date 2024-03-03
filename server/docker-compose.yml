@@ -3,6 +3,7 @@ services:
   opensearch-node1: # This is also the hostname of the container within the Docker network (i.e. https://opensearch-node1/)
     image: opensearchproject/opensearch:latest
     container_name: opensearch-node1
+    hostname: opensearch-node1
     # command: bash -c "sysctl -w vm.max_map_count=262144" # <--- I should pass this as environment variable
     environment:
       - cluster.name=opensearch-cluster # Name the cluster
@@ -62,7 +63,7 @@ services:
       - opensearch-net
 
   lamp: # this is the fornt end service
-    image: hrida/lamp:0.0.0.1
+    image: hrida/lamp
     container_name: front_end_lamp
     hostname: lamp
     ports:
@@ -72,7 +73,7 @@ services:
     restart: unless-stopped
 
   light: # this is the back end service
-    image: hrida/light:0.0.0.2
+    image: hrida/light
     container_name: back_end_light
     environment:
       - OPENAI_API_KEY = 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
@@ -98,3 +99,5 @@ volumes:
 
 networks:
   opensearch-net:
+    driver: bridge
+    name: opensearch-net

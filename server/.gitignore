@@ -141,3 +141,4 @@ cython_debug/
 lgs/
 new_backend/
 test/
+backend/api/pipeline_modules/glove.6B.50d.txt

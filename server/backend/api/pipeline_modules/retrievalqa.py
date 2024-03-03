@@ -6,7 +6,7 @@ import os
 class RetrievalQAManager:
     def __init__(self) -> None:
         try:
-            api_key = os.getenv("OPENAI_API_KEY") # "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" 
+            api_key = os.getenv("OPENAI_API_KEY") # "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"
             if api_key is None:
                 raise ValueError("OPENAI_API_KEY is not set in the environment variables. Please set it and restart the server.")
             else:
@@ -26,7 +26,8 @@ class RetrievalQAManager:
                                                                              memory=self.memory)
         return self.qa_dict[chain_type]
 
-    def conversationalRetrievalChain(self, question, vector: VectorStoreManager, chain_type):
+    # Conversational Retrieval Chain
+    def query(self, question, vector: VectorStoreManager, chain_type):
         if chain_type == "":
             chain_type = "stuff"
 

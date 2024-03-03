@@ -7,12 +7,12 @@ class OpenSearchManager:
 
     def __init__(self):
         self.utils = Utils()
-        host = 'localhost'
-        port = 9200
+        host = 'opensearch-node1' #'localhost'
+        # port = 9200
         auth = ('admin', '!akjdaDsdoij!oijadSsajd123120938')
 
         self.client = OpenSearch(
-            hosts = [{'host': host, 'port': port}],
+            hosts = [{'host': host}], # 'port': port
             http_auth = auth,
             use_ssl = True,
             verify_certs = False,
@@ -60,10 +60,10 @@ class OpenSearchManager:
             "query": {
                 "knn": {
                     "vector": {
-                        "vector": embedding,
-                        "k": self.k  # Number of nearest neighbors to retrieve
+                            "vector": embedding,
+                            "k": self.k  # Number of nearest neighbors to retrieve
+                            }
                         }
-                    }
                     }
                 }
         # Execute the search
@@ -152,8 +152,8 @@ class OpenSearchManager:
             return context
 
     def getAllIndices(self):
-        #url = "_cat/indices?v"
-        #allIndices = self.client.transport.perform_request(method = "GET", url = url)
+        # url = "_alias"
+        # allIndices = self.client.transport.perform_request(method = "GET", url = url)
 
         allIndices = self.client.indices.get_alias().keys()
         allIndicesList = []

@@ -2,15 +2,19 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
+USER root:root
+
+RUN apt-get update \
+    && apt-get install bash \
+    && apt-get clean
+
+RUN apt-get install curl -y
+
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
 RUN az config set core.encrypt_token_cache=false
 
 COPY ./requirements.txt /app/requirements.txt
-
-RUN apt-get update \
-    && apt-get install bash \
-    && apt-get clean
 
 RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt \
     && rm -rf /root/.cache/pip
