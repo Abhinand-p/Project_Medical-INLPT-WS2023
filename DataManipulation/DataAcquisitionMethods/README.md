@@ -18,6 +18,10 @@
 1. This method of data acquisition is limited to fetch 9,998 records.
 2. In-order to fasten the fetching process Data_Acquisition_Parallel_Threading utilised Process parallelization method. However, utilizing this method sometime results in blocking the API key by PubMed.
 
+---
+> Note: We have opted to gather the data utilizing the API calls method for our project.
+> The decision is based on the time taken to gather the data.
+
 ## Method 2: EDirect fetch
 
 ### Step 1: Installation
@@ -37,7 +41,6 @@
 1. This method of data acquisition has no limit in record fetches.
 2. This method is, time-consuming when compared to API calls method.
 
----
+## Method 3: Crawler
 
-> Note: We have opted to gather the data utilizing the API calls method for our project.
-> The deicision is based on the time taken to gather the data.
+

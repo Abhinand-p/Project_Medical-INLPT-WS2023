@@ -25,6 +25,28 @@ npm install to install all the required dependencies from package.json
 
 # Folder Structutre Description
 
+1. /DataManipulation
+- This folder involves all the code we wrote for scraping the pubmed data and formatting it into a Dataset
+
+2. /EvaluationMethods
+- When we started to think about an evaluation method we knew the first thing we need is some kind of question/answer (where answers are ground truths) so we started with experimeting wit different LLMs and prompts to let them create such a set. However most of them didnt gave us a set with the desired quality, the only thing that worked was the createSyntheticTestData method from ragas. The /experimental folder contains the past attempts.
+- Once we had the question/answer set available we had to run it through the different pipeline configurations and collect the retrieved contexts / answers, this data is stored in /ragas_eval_sets 
+- The Notebook where we utilized the evaluation sets to get the respective metrics is in: ragas/ragasEval_openai.ipynb
+
+3. /Meetings
+- This folder contains a log for our weekly meetings
+
+4. /ProjectPath
+- This folder contains some documentation on ideas and go to's for our project
+
+5. /Retrieval
+- /Embedding: This folder contains all different aproaches we tried to chunk and vectorize our data
+- /OpenSearch: On here we have a .yml file to launch and run the whole project inside a docker container as a compose project
+- /TF_IDF: Some early experiments with tf-idf
+
+6. /server
+- Our end-to-end Chatbot is run on a website. This website is powered by two dedicated servers, one for frontend and one for backend. This folder contains the source code for both of them.
+
 ### Data Analysis
 
 [Check here](./Data%20Analysis/README.md)

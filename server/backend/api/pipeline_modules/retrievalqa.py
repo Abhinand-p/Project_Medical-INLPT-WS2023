@@ -30,12 +30,14 @@ class RetrievalQAManager:
         if chain_type not in self.qa_dict:
             self.qa_dict[chain_type] = ConversationalRetrievalChain.from_llm(llm=self.llm,
                                                                              retriever=vector.db.as_retriever(search_kwargs={"k":2, "vector_field": "vector"}),
+                                                                             retriever=vector.db.as_retriever(search_kwargs={"k":2, "vector_field": "vector"}),
                                                                              chain_type = chain_type,
                                                                              memory=self.memory)
         return self.qa_dict[chain_type]
 
     # Conversational Retrieval Chain
     def query(self, question, vector: VectorStoreManager, chain_type):
+
         if chain_type == "":
             chain_type = "stuff"
 

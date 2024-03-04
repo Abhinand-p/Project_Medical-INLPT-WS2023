@@ -51,6 +51,7 @@ const ChatComponent: React.FC = () => {
   const handleDropdownChange_chain_type = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
+    console.log(llms_list)
     setChain_type(event.target.value);
   };
   const handleDropDownChange_llm = (
