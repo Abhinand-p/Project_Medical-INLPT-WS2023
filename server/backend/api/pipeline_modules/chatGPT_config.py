@@ -121,7 +121,7 @@ class GPTManager:
         print("########/#/#/#/:" ,query, vector)
         list_questions = []
 
-        output_parser = LineListOutputParser()
+        #output_parser = LineListOutputParser()
 
         # Other inputs
         question = "simplify the question"
@@ -137,10 +137,10 @@ class GPTManager:
                 Original question: {question}""")
 
         # Chain
-        llm_chain = LLMChain(llm=self.chatAIBot, prompt=QUERY_PROMPT, output_parser=output_parser)
+        llm_chain = LLMChain(llm=self.chatAIBot, prompt=QUERY_PROMPT)
 
         # Run
-        retriever = MultiQueryRetriever(retriever=vector.db.as_retriever(), llm_chain=llm_chain, parser_key="lines")
+        retriever = MultiQueryRetriever(retriever=vector.db.as_retriever(search_kwargs={"vector_field": "vector"}), llm_chain=llm_chain, parser_key="lines")
 
         # Results
         retriever.get_relevant_documents(query=query)
@@ -169,14 +169,11 @@ class GPTManager:
 
         with open(logfilename, "r") as file:
             lines = file.readlines()
-            line = lines[-1]
-            log_parts = line.split(':')
-            message = log_parts[1]
-            start_index = message.index("['")
-            end_index = message.index("']") + 2
-            queries_str = message[start_index:end_index]
-            queries_list = eval(queries_str)
-        return queries_list
+            lines = lines[:5]
+            lines[0] = lines[0].split(":")[1]
+            print(lines)
+
+        return lines
 
     def load_glove_model(self, glove_file):
         if not os.path.exists(glove_file): # Check if the GloVe embeddings are already downloaded

@@ -53,7 +53,7 @@ class OpenSearchManager:
 
     def denseRetrieval(self ,embedding, index):
         if index in self.index_with_chunks:
-            self.k = 10
+            self.k = 5
         else: self.k = 2
         knn_search_body = {
         "size": self.k,  # Number of nearest neighbors to retrieve
@@ -75,7 +75,7 @@ class OpenSearchManager:
 
     def sparseRetrieval(self ,question, index):
         if index in self.index_with_chunks:
-            self.k = 10
+            self.k = 5
         else: self.k = 2
         text_search_body = {
         "size" : self.k,
@@ -92,7 +92,7 @@ class OpenSearchManager:
 
     def hybridSearch(self, question,embedding, index):
         if index in self.index_with_chunks:
-            self.k = 10
+            self.k = 5
         else: self.k = 2
         print(question)
         print(embedding)

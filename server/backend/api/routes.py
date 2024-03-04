@@ -102,7 +102,9 @@ def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_str
         embedded_query = embed.controller(generated_query, retrieval_strategy, index)
 
       # Retrieve the data for the query transformed question with a retrieval strategy
-      context += openSearch.controller(retrieval_strategy, embedded_query, question, index) + ". " # Concatenate the context for each query transformed question
+        res = openSearch.controller(retrieval_strategy, embedded_query, question, index)[0]["context"]
+        print(res)
+      context +=res + ". " # Concatenate the context for each query transformed question
   else:
     #Embed query
     embedded_query = embed.controller(question, retrieval_strategy, index) # Index corresponds to the vector space in opensearch since we have one index per embedding model
