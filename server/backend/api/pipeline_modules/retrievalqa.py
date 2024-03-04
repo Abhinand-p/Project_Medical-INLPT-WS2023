@@ -9,7 +9,7 @@ class RetrievalQAManager:
     def __init__(self) -> None:
         try:
             # Load .env file
-            load_dotenv(dotenv_path=find_dotenv())
+            # load_dotenv(dotenv_path=find_dotenv())
             print("######### RetrivalQA #############")
             print(os.getenv("OPENAI_API_KEY"))
             print("##################################")

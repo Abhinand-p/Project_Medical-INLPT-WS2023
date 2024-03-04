@@ -15,7 +15,7 @@ class AzureManager:
         self.msg = ""
         try:
             # Load .env file
-            load_dotenv(dotenv_path=find_dotenv())
+            # load_dotenv(dotenv_path=find_dotenv())
             print("######### AZURE #############")
             print(os.getenv("HF_AUTH"))
             print(os.getenv("OPENAI_API_KEY"))

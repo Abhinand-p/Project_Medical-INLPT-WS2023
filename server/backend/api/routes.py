@@ -8,7 +8,7 @@ router = APIRouter()
 
 # Generation
 gpt3 = chatGPT_config.GPTManager()
-#llama7b = llama7b_config.LlamaManager()
+llama7b = llama7b_config.LlamaManager()
 azure = azure_config.AzureManager()
 retrievalQA = retrievalqa.RetrievalQAManager()
 
@@ -123,8 +123,8 @@ def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_str
   elif llm == llm_list[1]:
     answer = retrievalQA.query(question, vector, chainType)
 
-  # elif llm == llm_list[2]:
-  #   answer = llama7b.query(question, context)
+  elif llm == llm_list[2]:
+    answer = llama7b.query(question, context)
 
   elif llm == llm_list[3]:
     if index == "e5-base-v2" or index == "distilroberta":
