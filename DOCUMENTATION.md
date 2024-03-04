@@ -28,7 +28,7 @@ It is also possible to give an outlook of the results the reader can expect to s
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In an era dominated by vast amounts of scientific literature, accessing and comprehending relevant information poses a significant challenge for researchers and professionals.
 Our project addresses this issue by implementing a Retrieval Augmented Generation (RAG) system connected to GPT-3.5 and Llama 2, a state-of-the-art language model developed by OpenAI and Meta.
-This system aims to facilitate the extraction and synthesis of information from articles containing 'Intelligence' hosted on PubMed [1], a widely used database of biomedical literature.
+This system aims to facilitate the extraction and synthesis of information from articles containing 'Intelligence' hosted on PubMed [1](https://pubmed.ncbi.nlm.nih.gov/), a widely used database of biomedical literature.
 
 The primary objective of our project is to provide an intuitive and efficient means for users to query articles stored from PubMed and receive comprehensive and contextual relevant answers to their questions.
 As none of the LLMs are working with updated data, they all suffer from providing answers based on most recent information.
@@ -50,7 +50,7 @@ However, you should not go into all the details about any of the work you cite, 
 Those, that are labeled as [Outdated] are part of experiment we did but not used in the final product.
 
 ### Data Acquisition
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; From the PubMed section intelligence [2], we gathered abstracts between 2013-2023 that contains the term 'Intelligence' from PubMed.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; From the PubMed section intelligence [2](https://pubmed.ncbi.nlm.nih.gov/?term=intelligence+%5BTitle%2Fabstract%5D&filter=simsearch1.fha&filter=years.2013-2023&sort=date&size=200), we gathered abstracts between 2013-2023 that contains the term 'Intelligence' from PubMed.
 To do this we provided different technique that is clarified as follows:
 
 1. API:
@@ -73,7 +73,7 @@ This augmentation of data granularity and scope contributes to the enrichment of
 ### Data Storage
 1. Opensearch: Cloud-based
 
-2. OpenSearch [3], a cloud-based platform:
+2. OpenSearch [3](https://opensearch.org/docs/latest/about/), a cloud-based platform:
     adopts a split approach for efficient management of data. Regarding storage, the utilization of diverse embedding models necessitated the segmentation of dataset contexts due to the limitations imposed by maximum length constraints. Consequently, each abstract's context was partitioned into chunks, each identified by a relative ID format, such as PMID-chunk_number. These chunks, along with their associated embeddings, context, and pertinent resources, are stored within the OpenSearch infrastructure. Concerning retrieval, a hybrid search methodology is employed, leveraging the capabilities of OpenSearch to retrieve the k most relevant pieces of data efficiently. This approach enhances the effectiveness of information retrieval within the system, facilitating optimized access to pertinent information. Further exploration of the mechanisms underlying this hybrid search strategy may shed light on its efficacy and potential avenues for refinement and improvement.
 
 3. Pinecone: Cloud based, split approach [Outdated]
@@ -96,7 +96,7 @@ This augmentation of data granularity and scope contributes to the enrichment of
 3. One could also take the embedded chunks of an abstract and combine them by f.e. mean pooling, this way we end up with one embedding per abstarct agin
    - Not sure about the quality of the resulting embedding
 ### 2. Approach
-   - In this methodology, drawn from the Transformer library, the AutoTokenizer module is employed to perform tokenization on the dataset utilizing the pretrained model 'sentence-transformers/all-distilroberta-v1' [4]. This process is facilitated by the 'RecursiveCharacterTextSplitter' function from the langchain.text_splitter module. Given the constraint that the maximum input length for this model is 512 tokens, yielding an output dimensionality of 768, a decision was made to partition the data into chunks of size 400, with a 50-token overlap between consecutive chunks. This strategy is implemented to preserve the contextual coherence within each abstract. The adoption of character-based splitting ensures a degree of robustness to misspellings, thereby enhancing the model's retrieval capabilities. Admittedly, chunking the data results in an increased number of units, yet it concurrently enhances the efficiency of data retrieval and search operations. This trade-off between granularity and efficiency underscores the pragmatic considerations governing the data preprocessing stage in natural language processing tasks.
+   - In this methodology, drawn from the Transformer library, the AutoTokenizer module is employed to perform tokenization on the dataset utilizing the pretrained model 'sentence-transformers/all-distilroberta-v1' [4](https://huggingface.co/sentence-transformers/all-distilroberta-v1/blame/e5e0bbabc6e2c6e494a64b5018d1b40775b173a7/README.md). This process is facilitated by the 'RecursiveCharacterTextSplitter' function from the langchain.text_splitter module. Given the constraint that the maximum input length for this model is 512 tokens, yielding an output dimensionality of 768, a decision was made to partition the data into chunks of size 400, with a 50-token overlap between consecutive chunks. This strategy is implemented to preserve the contextual coherence within each abstract. The adoption of character-based splitting ensures a degree of robustness to misspellings, thereby enhancing the model's retrieval capabilities. Admittedly, chunking the data results in an increased number of units, yet it concurrently enhances the efficiency of data retrieval and search operations. This trade-off between granularity and efficiency underscores the pragmatic considerations governing the data preprocessing stage in natural language processing tasks.
 ### 2. TF-IDF[Outdated]
    - In this Approach we used the TfidfVectorizer from sklearn and set the analyzing level to characters which provided us the misspelling tolerance. Moreover, we used nltk to add the synonyms to the search of most k relevant abstacts. 
 
@@ -158,26 +158,43 @@ instead of stating unproven claims.)
 ## Experimental Details:
 
 ### Evaluating our Pipeline
-A RAG pipeline is composed of multiple parts and provides plenty of differen ways on how to configure it. Everyone in our group had different ideas on how to chunk, embed or store the data or which LLM would be best to generate an answer. Thats why it was important for us to have some kind of comparison between all the different configurations. 
+A RAG pipeline is composed of multiple parts and provides plenty of different ways on how to configure it.
+Everyone in our group had different ideas on how to chunk, embed or store the data or which LLM would be best to generate an answer.
+That's why it was important for us to have some kind of comparison between all the different configurations. 
 
-In general, evaluating RAG pipelines is hard. You need to assess both how well information is retrieved and how effectively it's used for generation. Additionally, biases in the LLM and the quality of retrieved context can significantly impact the final output. RAGAS (https://github.com/explodinggradients/ragas) stands out here because of its metric-driven approach. It offers a comprehensive suite of metrics for retrieval relevance, factual consistency, and linguistic quality. This allows for targeted optimization based on data, not just guesswork. With RAGAS, one can pinpoint weaknesses and refine his RAG pipeline for better overall performance.
-Another strong strength of RAGAS is its oportunity to create Synthetic Test Data which include Question-Answer (Groundtruth) pairs that can be used for evaluation. We initally tried to create them on our one with different LLMs and sophisticated querries but couldnt manage to bring the data up to a certain quality. RAGAS however provides a usefull framework for that, after providing our textual data, an LLM (GPT 3.5 Turbo) and a configuration about the type of questions, it provided diverse and interesting questions, along with correct answers to them. We created 100 Question-Answer pairs with the following distribution:
+In general, evaluating RAG pipelines is hard. 
+We need to assess both how well information is retrieved and how effectively it's used for generation.
+Additionally, biases in the LLM and the quality of retrieved context can significantly impact the final output.
+RAGAS [5](https://github.com/explodinggradients/ragas) stands out here because of its metric-driven approach.
+It offers a comprehensive suite of metrics for retrieval relevance, factual consistency, and linguistic quality.
+This allows for targeted optimization based on data and not just with guesswork.
+With RAGAS, one can pinpoint weaknesses and refine his RAG pipeline for better overall performance.
+
+Another strong strength of RAGAS is its opportunity to create Synthetic Test Data, which include Question-Answer (Ground truth) pairs that can be used for evaluation.
+We initially tried to create them on our one with different LLMs and sophisticated queries but couldn't manage to bring the data up to a certain quality.
+RAGAS, provides a useful framework for that; after providing our textual data, an LLM (GPT 3.5 Turbo) and a configuration about the type of questions, it provided diverse and interesting questions, along with correct answers to them.
+We created 100 Question-Answer pairs with the following distribution [6](https://docs.ragas.io/en/stable/getstarted/testset_generation.html):
 - simple 0.25
 - reasoning: 0.5
 - multi_context: 0.1
 - conditional: 0.15
 
-(See official documentation for more information on question types: https://docs.ragas.io/en/stable/getstarted/testset_generation.html)
+When actually assessing the metrics, one can either choose to use a custom LLM or to take the default variant which is using openAI's GPT 3.5 Turbo.
+It turned out using the default option is very cost expensive which is why we tried to use a local llama2-7b-chat-hf instead.
+This, however, wasn't fees able since with the number of questions even our strongest available machine ran of GPU memory (64 GB).
+So we decided a compromise by using openAI but therefore reducing the number of questions we use for evaluating our pipeline.
+We ran the 30 question-answer pairs through our different pipeline configurations and collected the respective Answers/ retrieved contexts into a new Data set.
+We then evaluated these over 4 metrics, 2 for the retrieval (Context Relevancy and Recall) and 2 for the generation(Answer Relevancy and Faithfulness): 
 
-When actually assessing the metrics one can either choose to use a custom LLM or to take the default variant which is using openAI's GPT 3.5 Turbo. It turned out using the default option is very cost expensive which is why we tried to use a local llama2-7b-chat-hf instead. This however wasn't feesable aswell since with the amount of questions even our strongest available machine ran of GPU memory (64 GB). So we decided a compromise by using openAI but therefore reducing the number of questions we use for evaluating our pipeline.
-We ran the 30 question-answer pairs through our different pipeline configurations and collected the respective Answers/ retrieved contexts into a new Data set. We then evaluated these over 4 metrics, 2 for the retrieval (Context Relevancy and Recall) and 2 for the generation (Answer Relevancy and Faithfullness): 
+![eval_results.png](EvaluationMethods%2Fragas%2Feval_results.png)
 
-![Example Image](EvaluationMethods/ragas/eval_results.pdf)
-
-While both embeding models outperformed the bm25 based baseline, their retrieval metrics for dense retrival and Hybrid Search didn't differ much from each. The reason wh the context Relevancy is rather low comes from the nature of how this metric is assessed. Its the ratio of sentences of the context which exclusively contain essential information about the query to the toal number of sentences in the context. Since the shown approach didn't chunk and crreated one embedding per abstract, depending on the question the context might carry a lot of overhead.
+While both embedding models outperformed the bm25 based baseline, their retrieval metrics for dense retrival and Hybrid Search didn't differ much from each.
+The reason for low-context Relevancy is from the nature of how this metric is assessed. Its ratio of sentences of the context, which exclusively contains essential information about the query to the total number of sentences in the context.
+Since the shown approach didn't chunk and created one embedding per abstract, depending on the question, the context might carry a lot of overhead.
 
 ### Query Transformation Technique:
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; We've implemented a query transformation technique within our application, leveraging the LangChain MultiQueryRetriever.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; We've implemented a query transformation technique within our application,
+leveraging the LangChain MultiQueryRetriever [7](https://python.langchain.com/docs/modules/data_connection/retrievers/MultiQueryRetriever).
 This approach aims to streamline the process of finding relevant articles within our PubMed dataset by enhancing query generation. 
 
 Using ChatGPT Turbo 3.5, we simplify the original query through prompt engineering, generating new queries.
@@ -191,7 +208,7 @@ Our primary objective with this methodology is to break down complex questions i
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In our conversational retrieval chain, we've integrated LangChain to enhance the interaction experience.
 This mechanism allows us to seamlessly retrieve relevant conversational cues and responses to user queries.
 
-Using LangChain's capabilities, we've structured our system to identify conversational patterns and retrieve appropriate responses based on user inputs.
+Using LangChain's [8](https://js.langchain.com/docs/modules/chains/popular/chat_vector_db) capabilities, we've structured our system to identify conversational patterns and retrieve appropriate responses based on user inputs.
 By analyzing the context and intent behind each interaction, LangChain enables us to maintain a coherent conversation flow.
 
 This approach ensures that users receive timely and contextually relevant responses, enhancing the overall conversational experience.
@@ -205,19 +222,15 @@ learned during the project.)
 ## References
 [comment]: <> (List your references at the end of your report. You can add them as a list at the end of your
 report and refer to the author's name and year in the text, e.g., [Gertz et al.
-2020](#link-to-the-bib-section \). Make sure you follow proper citation methods and include
+2020]#link-to-the-bib-section. Make sure you follow proper citation methods and include
 all author's names, the name of the journal or conference, the full title of the paper, and the
 publication year.)
 
-[1]: #ref1
-[2]: #ref2
-[3]: #ref3
-[4]: #ref4
-
-[National Center for Biotechnology Information. (n.d.). PubMed. Retrieved Oct. 30, 2023, from https://pubmed.ncbi.nlm.nih.gov/](#ref1)
-
-[National Center for Biotechnology Information. (n.d.). PubMed. Retrieved Nov. 05, 2023, from https://pubmed.ncbi.nlm.nih.gov/?term=intelligence+%5BTitle%2Fabstract%5D&filter=simsearch1.fha&filter=years.2013-2023&sort=date&size=200](#ref2)
-
-[OpenSearch. (n.d.). About OpenSearch. Retrieved Feb. 01, 2024, from https://opensearch.org/docs/latest/about/](#ref3)
-
-[Hugging Face. (n.d.). README.md. Sentence Transformers - DistilRoBERTa, a distilled version of RoBERTa. Retrieved Feb. 01, 2024, from https://huggingface.co/sentence-transformers/all-distilroberta-v1/blame/e5e0bbabc6e2c6e494a64b5018d1b40775b173a7/README.md](#ref4)
+1. [National Center for Biotechnology Information. (n.d.). PubMed. Retrieved Oct. 30, 2023](https://pubmed.ncbi.nlm.nih.gov/)
+2. [National Center for Biotechnology Information. (n.d.). PubMed. Retrieved Nov. 05, 2023](https://pubmed.ncbi.nlm.nih.gov/?term=intelligence+%5BTitle%2Fabstract%5D&filter=simsearch1.fha&filter=years.2013-2023&sort=date&size=200)
+3. [OpenSearch. (n.d.). About OpenSearch. Retrieved Feb. 01, 2024](https://opensearch.org/docs/latest/about/)
+4. [Hugging Face. (n.d.). README.md. Sentence Transformers - DistilRoBERTa, a distilled version of RoBERTa. Retrieved Feb. 01, 2024](https://huggingface.co/sentence-transformers/all-distilroberta-v1/blame/e5e0bbabc6e2c6e494a64b5018d1b40775b173a7/README.md)
+5. [RAGAS](https://github.com/explodinggradients/ragas)
+6. [Generate a Synthetic Test Set](https://docs.ragas.io/en/stable/getstarted/testset_generation.html)
+7. [Multi Query Retriever](https://python.langchain.com/docs/modules/data_connection/retrievers/MultiQueryRetriever)
+8. [Conversational Retrieval QA](https://js.langchain.com/docs/modules/chains/popular/chat_vector_db)
