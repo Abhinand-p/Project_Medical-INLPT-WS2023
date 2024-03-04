@@ -9,7 +9,6 @@ from langchain.chains import LLMChain
 from langchain.retrievers.multi_query import MultiQueryRetriever
 from utils import LineList, LineListOutputParser
 from langchain.schema import (SystemMessage, HumanMessage, AIMessage)
-from dotenv import load_dotenv
 import os
 from utils import Utils
 import logging
@@ -18,6 +17,7 @@ from langchain.chains import RetrievalQA
 from .vector_store import VectorStoreManager
 import urllib.request
 import zipfile
+from dotenv import load_dotenv, find_dotenv
 
 systemPrompts = {
     "system_prompt1" : "You are a researcher on Medical Intelligence, that can answer questions based on the provided articles.",
@@ -28,7 +28,14 @@ class GPTManager:
 
     def __init__(self):
         try:
-            load_dotenv()
+            # Load .env file
+            load_dotenv(dotenv_path=find_dotenv())
+            print("######### GPT #############")
+            print(os.getenv("HF_AUTH"))
+            print(os.getenv("OPENAI_API_KEY"))
+            print(os.getenv("VOYAGE_API_KEY"))
+            print("#############################")
+
             self.utils = Utils()
             api_key = os.getenv("OPENAI_API_KEY") # "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"
 
@@ -217,4 +224,3 @@ class GPTManager:
 
 
 
-  

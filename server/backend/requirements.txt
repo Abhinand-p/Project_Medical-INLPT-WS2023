@@ -9,6 +9,7 @@ azure-mgmt-compute==30.5.0
 azure-storage-blob==12.19.0
 azure-storage-file-datalake==12.14.0
 azure-storage-file-share==12.15.0
+azure-mgmt-resource
 bitsandbytes==0.42.0
 dill==0.3.7
 fastapi==0.109.0

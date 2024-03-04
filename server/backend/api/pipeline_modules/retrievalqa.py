@@ -3,9 +3,17 @@ from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 import os
+from dotenv import load_dotenv, find_dotenv
+
 class RetrievalQAManager:
     def __init__(self) -> None:
         try:
+            # Load .env file
+            load_dotenv(dotenv_path=find_dotenv())
+            print("######### RetrivalQA #############")
+            print(os.getenv("OPENAI_API_KEY"))
+            print("##################################")
+
             api_key = os.getenv("OPENAI_API_KEY") # "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"
             if api_key is None:
                 raise ValueError("OPENAI_API_KEY is not set in the environment variables. Please set it and restart the server.")
@@ -22,6 +30,7 @@ class RetrievalQAManager:
         if chain_type not in self.qa_dict:
             self.qa_dict[chain_type] = ConversationalRetrievalChain.from_llm(llm=self.llm,
                                                                              retriever=vector.db.as_retriever(search_kwargs={"k":2, "vector_field": "vector"}),
+                                                                             retriever=vector.db.as_retriever(search_kwargs={"k":2, "vector_field": "vector"}),
                                                                              chain_type = chain_type,
                                                                              memory=self.memory)
         return self.qa_dict[chain_type]
@@ -35,6 +44,5 @@ class RetrievalQAManager:
         qa_conversation = self.get_qa(vector, chain_type)
 
         result = qa_conversation({"question": question})
-        print("result",result)
-
+        print(result["answer"])
         return result["answer"]

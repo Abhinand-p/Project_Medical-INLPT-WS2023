@@ -3,32 +3,38 @@ from openai  import  OpenAI
 import voyageai
 from langchain_community.embeddings import HuggingFaceEmbeddings
 import os
+from dotenv import load_dotenv, find_dotenv
 
 #One index corresponds to 1 embedding model
 
 class EmbeddingManager:
 
     def __init__(self):
-        # config = configparser.ConfigParser()
-        # config.read('config.ini')
-        #voyageai.api_key = config['API_KEY']['VOYAGE_API_KEY']
-
         try:
-            voyageai.api_key =  os.getenv("VOYAGE_API_KEY") # "pa-3xpcuUhVVgmOQPDBiG7ObYUA58rGn1eB1ZMaowr5xy0"
+            # Load .env file
+            load_dotenv(dotenv_path=find_dotenv())
+            print("######### Embdding #############")
+            print(os.getenv("HF_AUTH"))
+            print(os.getenv("OPENAI_API_KEY"))
+            print(os.getenv("VOYAGE_API_KEY"))
+            print("###############################")
 
+            voyageai.api_key =  os.getenv("VOYAGE_API_KEY") # "pa-3xpcuUhVVgmOQPDBiG7ObYUA58rGn1eB1ZMaowr5xy0"
+            print(os.getenv("VOYAGE_API_KEY"))
             #Config mbedding models
             self.embedding_list = ["voyage-2-large", "text-embedding-3-large","distilroberta", "e5-base-v2"]
 
             self.voyageAIClient = voyageai.Client()
-
+            print("voyageAIClient")
             self.openAIClient = OpenAI(api_key=os.getenv("OPENAI_API_KEY")) # "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"
-
+            print("openAIClient")
             self.distilroberta = HuggingFaceEmbeddings(model_name='sentence-transformers/all-distilroberta-v1')
-
+            print("distilroberta")
             self.e5 = HuggingFaceEmbeddings(model_name="intfloat/e5-base-v2",
                                             model_kwargs={'device':'cpu'},
                                             encode_kwargs={'normalize_embeddings': False,
                                             'batch_size': 32})
+            print("e5")
         except Exception as varname:
             print(varname)
 

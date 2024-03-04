@@ -1,7 +1,8 @@
 """This module contains the utility functions for the backend server."""
 import re, pickle
 from langchain.output_parsers import PydanticOutputParser
-from langchain.pydantic_v1 import BaseModel, Field
+# from langchain.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 from typing import List
 
 class Utils:

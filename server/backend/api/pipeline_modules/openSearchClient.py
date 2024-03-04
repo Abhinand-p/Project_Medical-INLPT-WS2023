@@ -7,12 +7,12 @@ class OpenSearchManager:
 
     def __init__(self):
         self.utils = Utils()
-        host = 'localhost' #'localhost'
-        # port = 9200
+        host = 'localhost' #'localhost' # be aware of docker that should be hostname of the service
+        port = 9200
         auth = ('admin', 'admin')
 
         self.client = OpenSearch(
-            hosts = [{'host': host}], # 'port': port
+            hosts = [{'host': host, 'port': port}], # 'port': port
             http_auth = auth,
             use_ssl = True,
             verify_certs = False,

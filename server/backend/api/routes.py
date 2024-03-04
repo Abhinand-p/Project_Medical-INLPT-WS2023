@@ -35,13 +35,15 @@ async def mirror(text: str = Body(..., embed= True)):
 @router.get("/getOpenSearchIndices")
 def getIndices():
   #Filter out default Indices that are always present
-  defaultIndices = set( [".plugins-ml-config",".opensearch-observability",".opensearch-sap-log-types-config",".opendistro_security", ".kibana_1", "sophiaqho-boolq_finetuned_on_pubmed"])
+  defaultIndices = set( [".ql-datasources", ".kibana_92668751_admin_1", ".plugins-ml-config",".opensearch-observability",".opensearch-sap-log-types-config",".opendistro_security", ".kibana_1", "sophiaqho-boolq_finetuned_on_pubmed"])
   allIndices = openSearch.getAllIndices()
 
   filtered_list = [item for item in allIndices if item not in defaultIndices]
 
-  #Filter out security logs
+  # Filter out security logs
   filtered_list = [string for string in filtered_list if "security" not in string]
+  # Filter out kibana logs
+  filtered_list = [string for string in filtered_list if "kibana" not in string]
   return filtered_list
 
 @router.get("/status")
@@ -49,7 +51,7 @@ def status():
   #Initialize connection to opensearch
   host = 'opensearch-node1'
   # port = 9200
-  auth = ('admin', '!akjdaDsdoij!oijadSsajd123120938')
+  auth = ('admin', 'admin')
 
   client = OpenSearch(
       hosts = [{'host': host}],
@@ -89,17 +91,19 @@ def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_str
   if checking_availability == False:
     return err
 
-  # Query Transformatio
-  if QueryTransformation == "true":
-    # Perform Query Transformation
-    query_transform_questions = gpt3.queryTransformation(question, vector)
-    context = ""
-    embedded_query = ""
-    for generated_query in query_transform_questions:
-      # Embed the query transformed question (but not if we chose sparse retrieval)
-      
-      if(retrieval_strategy != "Sparse Retrieval"):
-        embedded_query = embed.controller(generated_query, retrieval_strategy, index)
+  if llm != llm_list[1]:
+    # Query Transformation
+    if QueryTransformation == "true":
+      # Perform Query Transformation
+      query_transform_questions = gpt3.queryTransformation(question, vector)
+      context = ""
+      embedded_query = ""
+
+      for generated_query in query_transform_questions:
+
+        # Embed the query transformed question (but not if we chose sparse retrieval)
+        if(retrieval_strategy != "Sparse Retrieval"):
+          embedded_query = embed.controller(generated_query, retrieval_strategy, index)
 
       # Retrieve the data for the query transformed question with a retrieval strategy
         res = openSearch.controller(retrieval_strategy, embedded_query, question, index)[0]["context"]
