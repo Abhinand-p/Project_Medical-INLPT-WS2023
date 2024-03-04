@@ -44,6 +44,12 @@ Finally, we discuss potential applications, limitations, and future directions f
 This includes papers that you used as a basis for your approach or papers that used the same techniques as you did but applied them to a different problem.
 In this section, you should emphasize how your work differs from previous work, e.g., by outlining the limitations of previous work, or why your application domain is different from those other researchers have already investigated. 
 However, you should not go into all the details about any of the work you cite, instead, you should outline how the major points of previous work relate to your project.""")
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In reviewing prior work pertinent to our project, we delve into the evolving landscape of knowledge-intensive natural language processing tasks.
+Central to our investigation is the seminal work of Lewis et al. (2021) [9](https://arxiv.org/abs/2005.11401), which underscores the challenges
+posed by existing large pre-trained language models in accessing and manipulating knowledge effectively.
+Their exploration of retrieval-augmented generation (RAG) models, which integrate both parametric and non-parametric memory mechanisms, serves as a pivotal precursor to our research. 
+Drawing inspiration from this foundation, we formulate a fine-tuning recipe for RAG models tailored to our objectives, leveraging a pre-trained language model in conjunction with a dense vector index.
+By contextualizing our work within this framework of prior research, we not only acknowledge the foundational contributions but also establish a trajectory for advancing the efficacy of knowledge-aware NLP systems.
 
 ## Methods/Approach
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In the following parts, all the methods that are used to accomplish the final project are addressed.
@@ -97,14 +103,13 @@ This augmentation of data granularity and scope contributes to the enrichment of
    - Not sure about the quality of the resulting embedding
 ### 2. Approach
    - In this methodology, drawn from the Transformer library, the AutoTokenizer module is employed to perform tokenization on the dataset utilizing the pretrained model 'sentence-transformers/all-distilroberta-v1' [4](https://huggingface.co/sentence-transformers/all-distilroberta-v1/blame/e5e0bbabc6e2c6e494a64b5018d1b40775b173a7/README.md). This process is facilitated by the 'RecursiveCharacterTextSplitter' function from the langchain.text_splitter module. Given the constraint that the maximum input length for this model is 512 tokens, yielding an output dimensionality of 768, a decision was made to partition the data into chunks of size 400, with a 50-token overlap between consecutive chunks. This strategy is implemented to preserve the contextual coherence within each abstract. The adoption of character-based splitting ensures a degree of robustness to misspellings, thereby enhancing the model's retrieval capabilities. Admittedly, chunking the data results in an increased number of units, yet it concurrently enhances the efficiency of data retrieval and search operations. This trade-off between granularity and efficiency underscores the pragmatic considerations governing the data preprocessing stage in natural language processing tasks.
-### 2. TF-IDF[Outdated]
+### 2. TF-IDF [Outdated]
    - In this Approach we used the TfidfVectorizer from sklearn and set the analyzing level to characters which provided us the misspelling tolerance. Moreover, we used nltk to add the synonyms to the search of most k relevant abstacts. 
 
 ## Types of Questions and Answers
 The provided final product can answer the following question types:
 1. Confirmation Questions [yes or no]:
    - Is Moog the author of article 'CASK Disorders'?
-   - 
 
 2. Factoid-type Questions [what, which, when, who, how]:
    - Who is Moog?
@@ -114,19 +119,15 @@ The provided final product can answer the following question types:
 
 3. List-type Questions: 
    - List the name of authors of article 'CASK Disorders'.
-   - 
 
 4. Causal Questions [why or how]: 
    - Why is lung cancer deadly?
-   - 
 
 5. Hypothetical Questions:
    - What would happen if CASK Disorders is not treated?
-   - 
 
 6. Complex Questions:
    - What is relation of CASK Disorders in increasing the rate of breast cancer?
-   - 
 
 ## Experimental Setup and Results
 [comment]: <> (This section needs to cover the following information:)
@@ -158,7 +159,7 @@ instead of stating unproven claims.)
 ## Experimental Details:
 
 ### Evaluating our Pipeline
-A RAG pipeline is composed of multiple parts and provides plenty of different ways on how to configure it.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A RAG pipeline is composed of multiple parts and provides plenty of different ways on how to configure it.
 Everyone in our group had different ideas on how to chunk, embed or store the data or which LLM would be best to generate an answer.
 That's why it was important for us to have some kind of comparison between all the different configurations. 
 
@@ -218,6 +219,17 @@ Whether it's providing information, answering questions, or engaging in dialogue
 on the limitations of your work. Potentially, you can also outline how your model can be
 extended or improved in the future, or you can briefly give insights into what you have
 learned during the project.)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In our endeavor, we have made significant strides in implementing retrieval-augmented generation (RAG) by presenting a diverse array of retrieval strategies. 
+These include Sparse, Dense, and Hybrid search retrievals, each employing distinct embedding and chunking strategies to enhance the effectiveness of knowledge retrieval.
+A notable aspect of our approach is the flexibility afforded to users in selecting their preferred large language model (LLM) from options such as GPT-3.5 turbo, Azure ML, and Lamma2, thereby accommodating varied preferences and requirements.
+Additionally, we have introduced query transformation techniques aimed at decomposing complex questions to facilitate more targeted data retrieval. 
+Moreover, recognizing the importance of maintaining context in conversational settings, we have integrated conversational retrieval techniques to preserve the conversation history, ensuring coherence and relevance in subsequent interactions. 
+
+As a potential avenue for further improvement, we envision implementing a unified history storage mechanism that remains independent of the specific model chosen by the user.
+This would enable seamless traversal of conversation history across different models, offering users a consistent and comprehensive repository of past interactions. 
+By decoupling the history storage from the model selection process, we aim to enhance the continuity and coherence of conversations, irrespective of shifts in model preferences or requirements.
+This functionality would not only facilitate more informed and contextual relevant responses but also empower users with greater flexibility and control over their interactions. 
+By bridging the gap between different model choices and preserving historical context, we strive to enhance the overall user experience and effectiveness of knowledge-intensive NLP tasks.
 
 ## References
 [comment]: <> (List your references at the end of your report. You can add them as a list at the end of your
@@ -234,3 +246,4 @@ publication year.)
 6. [Generate a Synthetic Test Set](https://docs.ragas.io/en/stable/getstarted/testset_generation.html)
 7. [Multi Query Retriever](https://python.langchain.com/docs/modules/data_connection/retrievers/MultiQueryRetriever)
 8. [Conversational Retrieval QA](https://js.langchain.com/docs/modules/chains/popular/chat_vector_db)
+9. [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks](https://arxiv.org/abs/2005.11401)
