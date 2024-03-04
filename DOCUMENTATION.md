@@ -57,7 +57,7 @@ Those, that are labeled as [Outdated] are part of experiment we did but not used
 
 ### Data Acquisition
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; From the PubMed section intelligence [2](https://pubmed.ncbi.nlm.nih.gov/?term=intelligence+%5BTitle%2Fabstract%5D&filter=simsearch1.fha&filter=years.2013-2023&sort=date&size=200), we gathered abstracts between 2013-2023 that contains the term 'Intelligence' from PubMed.
-To do this we provided different technique that is clarified as follows:
+To do this, we provided different technique that is clarified as follows:
 
 1. API:
    - By this approach, we downloaded the xml file, which was later processed and the useful data extracted, using the preprocessing notebook, and finally the csv file of the related data was created.
@@ -92,12 +92,12 @@ This augmentation of data granularity and scope contributes to the enrichment of
 1. PubMedBERT, per-abstract embedding
    - BERT model finetuned on PubMed data, information retrieval/ QA, maps into 768 dimensional vectorspace, up to 512 token.
    - Created one embedding per abstract
-     -> Turned out to be badly implemented because models max input size was not taken into consideration
+     -> Turned out to be badly implemented because model max input size was not taken into consideration
 2. e5-large-V2, embed chunks and store chunks in abstract
    - "E5 is a general-purpose embedding model for tasks requiring a single-vector representation of texts such as retrieval, clustering, and classification, achieving strong performance in both zero-shot and fine-tuned settings." 1024 Output dimension, 512 input size
    - Chunk abstract after 512 tokens, between each chunk of an abstract create overlapping chunks
-   - Added 'local context' to each chunks metadata which is the text that appears before and after the chunk (local context appr. 20% of abstracts size). This will later on be concatinated with the chunks text so that the model in charge of answering the prompt has a better understanding of the chunk role in the abstract itself (context)
-   - We embedded and stored each chunk to our vector space which resulted in appr. 68k vectors
+   - Added 'local context' to each chunk metadata which is the text that appears before and after the chunk (local context appr. 20% of abstracts size). This will later on be concatinated with the chunks text so that the model in charge of answering the prompt has a better understanding of the chunk role in the abstract itself (context)
+   - We embedded and stored each chunk to our vector space, which resulted in appr. 68k vectors
    - Code can be found at: embedding\INLPT2023_2024.ipynb
 3. One could also take the embedded chunks of an abstract and combine them by f.e. mean pooling, this way we end up with one embedding per abstarct agin
    - Not sure about the quality of the resulting embedding
@@ -230,6 +230,13 @@ This would enable seamless traversal of conversation history across different mo
 By decoupling the history storage from the model selection process, we aim to enhance the continuity and coherence of conversations, irrespective of shifts in model preferences or requirements.
 This functionality would not only facilitate more informed and contextual relevant responses but also empower users with greater flexibility and control over their interactions. 
 By bridging the gap between different model choices and preserving historical context, we strive to enhance the overall user experience and effectiveness of knowledge-intensive NLP tasks.
+
+## Our one click demo of our product 
+The video can be found here:
+[ChatBot-DEMO.mkv](ChatBot-DEMO.mkv) or can be viewed in youtube by clicking the below image.
+
+[![One Click Video](https://img.youtube.com/vi/jB3XTGLvf6k/0.jpg)](https://youtu.be/jB3XTGLvf6k)
+
 
 ## References
 [comment]: <> (List your references at the end of your report. You can add them as a list at the end of your
