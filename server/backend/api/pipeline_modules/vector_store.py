@@ -15,8 +15,8 @@ class VectorStoreManager:
         print(os.getenv("VOYAGE_API_KEY"))
         print("####################################")
 
-        host = 'localhost' # be aware of the host name for docker
-        port = 9200
+        host = 'opensearch-node1' # be aware of the host name for docker
+        # port = 9200
         auth = ('admin', 'admin')
 
         #Config mbedding models
@@ -30,7 +30,7 @@ class VectorStoreManager:
 
         self.embedding_models = dict()
 
-        self.db = OpenSearchVectorSearch(opensearch_url=f"http://{host}:{port}", # remove port and change hostname for docker
+        self.db = OpenSearchVectorSearch(opensearch_url=f"http://{host}", # :{port} remove port and change hostname for docker
                                         index_name="",
                                         embedding_function = "",
                                         use_ssl = True,

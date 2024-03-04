@@ -37,7 +37,7 @@ class GPTManager:
             print("#############################")
 
             self.utils = Utils()
-            api_key = os.getenv("OPENAI_API_KEY") # "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"
+            api_key = os.getenv("OPENAI_API_KEY")
 
             if api_key is None:
                 raise ValueError("OPENAI_API_KEY is not set in the environment variables. Please set it and restart the server.")

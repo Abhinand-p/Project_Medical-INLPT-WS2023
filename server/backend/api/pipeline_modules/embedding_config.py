@@ -19,14 +19,14 @@ class EmbeddingManager:
             print(os.getenv("VOYAGE_API_KEY"))
             print("###############################")
 
-            voyageai.api_key =  os.getenv("VOYAGE_API_KEY") # "pa-3xpcuUhVVgmOQPDBiG7ObYUA58rGn1eB1ZMaowr5xy0"
+            voyageai.api_key =  os.getenv("VOYAGE_API_KEY")
             print(os.getenv("VOYAGE_API_KEY"))
             #Config mbedding models
             self.embedding_list = ["voyage-2-large", "text-embedding-3-large","distilroberta", "e5-base-v2"]
 
             self.voyageAIClient = voyageai.Client()
             print("voyageAIClient")
-            self.openAIClient = OpenAI(api_key=os.getenv("OPENAI_API_KEY")) # "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"
+            self.openAIClient = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
             print("openAIClient")
             self.distilroberta = HuggingFaceEmbeddings(model_name='sentence-transformers/all-distilroberta-v1')
             print("distilroberta")

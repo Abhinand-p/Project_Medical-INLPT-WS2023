@@ -77,7 +77,7 @@ services:
     container_name: back_end_light
     environment:
       - OPENAI_API_KEY=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
-      - HF_AUTH=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
+      - HF_AUTH=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
       - VOYAGE_API_KEY=pa-pBWwn664zrcc-80y0pFExXwjRuCKQhygngCFq7DT4d
       - AZURE_SUBSCRIPTION_KEY=5eec2903-9705-470a-835a-0221fbc8d93d
       - RESOURCE_GROUP_NAME=inlpt-az
