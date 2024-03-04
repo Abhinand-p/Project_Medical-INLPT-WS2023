@@ -57,7 +57,7 @@ Those, that are labeled as [Outdated] are part of experiment we did but not used
 
 ### Data Acquisition
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; From the PubMed section intelligence [2](https://pubmed.ncbi.nlm.nih.gov/?term=intelligence+%5BTitle%2Fabstract%5D&filter=simsearch1.fha&filter=years.2013-2023&sort=date&size=200), we gathered abstracts between 2013-2023 that contains the term 'Intelligence' from PubMed.
-To do this we provided different technique that is clarified as follows:
+To do this, we provided different technique that is clarified as follows:
 
 1. API:
    - By this approach, we downloaded the xml file, which was later processed and the useful data extracted, using the preprocessing notebook, and finally the csv file of the related data was created.
@@ -252,6 +252,13 @@ This would enable seamless traversal of conversation history across different mo
 By decoupling the history storage from the model selection process, we aim to enhance the continuity and coherence of conversations, irrespective of shifts in model preferences or requirements.
 This functionality would not only facilitate more informed and contextual relevant responses but also empower users with greater flexibility and control over their interactions. 
 By bridging the gap between different model choices and preserving historical context, we strive to enhance the overall user experience and effectiveness of knowledge-intensive NLP tasks.
+
+## Our one click demo of our product 
+The video can be found here:
+[ChatBot-DEMO.mkv](ChatBot-DEMO.mkv) or can be viewed in youtube by clicking the below image.
+
+[![One Click Video](https://img.youtube.com/vi/jB3XTGLvf6k/0.jpg)](https://youtu.be/jB3XTGLvf6k)
+
 
 ## References
 [comment]: <> (List your references at the end of your report. You can add them as a list at the end of your
