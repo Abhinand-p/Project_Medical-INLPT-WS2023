@@ -41,7 +41,7 @@ Note: for more *details* about the server pipeline please check [this](./server/
 
 * Postman web-requests .json exports can be found under `cd ./server/NLPT.postman_collection.json`
 
-* This link is a small show case of what we did in our project. HAVE FUN WATCHING :) [Video]()
+* This link is a small show case of what we did in our project. HAVE FUN WATCHING :) **[Video](https://drive.google.com/file/d/1ivs5L-dQ3H9FqK_WRd18ELzty9reFszV/view?usp=drive_link)**
 
 # Folder Structutre Description
 
