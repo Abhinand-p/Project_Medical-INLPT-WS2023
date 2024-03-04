@@ -3,22 +3,27 @@ from torch import bfloat16
 import transformers
 from transformers import LlamaTokenizer
 from langchain.llms import HuggingFacePipeline
-from dotenv import load_dotenv
 from utils import Utils
 import torch
+from dotenv import load_dotenv, find_dotenv
 
 class LlamaManager:
 
     def __init__(self):
         try:
-            load_dotenv()
+            # Load .env file
+            load_dotenv(dotenv_path=find_dotenv())
+            print("######### Llama #############")
+            print(os.getenv("OPENAI_API_KEY"))
+            print("#############################")
+
             self.utils = Utils()
 
-            hf_auth =  os.getenv("HF_API_KEY") # "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"
+            hf_auth =  os.getenv("HF_AUTH") # "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"
             model_id = 'meta-llama/Llama-2-7b-chat-hf'
 
             if hf_auth is None:
-                raise ValueError("HF_API_KEY is not set in the environment variables. Please set it and restart the server.")
+                raise ValueError("HF_AUTH is not set in the environment variables. Please set it and restart the server.")
             else:
                 model_config = transformers.AutoConfig.from_pretrained(model_id, token=hf_auth)
 
