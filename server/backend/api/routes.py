@@ -47,7 +47,7 @@ def getIndices():
   return filtered_list
 
 @router.get("/status")
-def status():
+def statuscheck():
   #Initialize connection to opensearch
   host = 'opensearch-node1'
   # port = 9200
@@ -77,7 +77,7 @@ def getChainTypes():
   return chain_types
 
 @router.get("/testAzure")
-def testAzure():
+def testAzureCheck():
   return azure.azure_status()
 
 @router.post("/pipeline")

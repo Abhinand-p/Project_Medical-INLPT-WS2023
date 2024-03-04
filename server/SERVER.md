@@ -15,9 +15,11 @@ This end-to-end chatbot application is realized by a locally hosted website thro
 
 ## Pipeline
 
-- ...
+- Embedding models (voyage-2-large, text-embedding-3-large, distilroberta, e5-base-v2)
+- Vector Store (Opensearch)
+- Models ("GPT 3.5 Turbo 0125", "GPT 3.5 Turbo 0125 (Langchain)", "LLAMA-2-7b-chat-hf", "Azure-Biobert-Pubmed-QA")
 
-## Setup
+## Step by step
 
 - Once pulled navigate to .../server/frontend and type in: "npm install" this will install all necessary frontend libraries
 - In the same directory open a terminal and type in: "npm run dev" to run the frontend server

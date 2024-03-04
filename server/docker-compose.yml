@@ -80,10 +80,10 @@ services:
       - HF_AUTH=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
       - VOYAGE_API_KEY=pa-pBWwn664zrcc-80y0pFExXwjRuCKQhygngCFq7DT4d
       - AZURE_SUBSCRIPTION_KEY=5eec2903-9705-470a-835a-0221fbc8d93d
-      - RESOURCE_GROUP_NAME=inlpt-az
-      - WORKSPACE_NAME=MLINLPT-AZ
-      - ONLINE_ENDPOINT_NAME=biobert-pubmed-qa
-      - DEPLOYMENT_NAME=biobert-pubmed-qa
+      - RESOURCE_GROUP_NAME=inlpt-azure-ml
+      - WORKSPACE_NAME=MLINLPT-Azure-ml
+      - ONLINE_ENDPOINT_NAME=biobert-pubmed-ml
+      - DEPLOYMENT_NAME=nlpt-biobert-ml
     hostname: light
     volumes:
       - ~/.azure:/root/.azure

@@ -13,13 +13,11 @@ In the project directory, you can run:
 
 To run the backend server we need to use Uvicorn for that to instantiate the required REST API.
 
-`uvicorn main:app --reload` which normally will run on port 8000
+`uvicorn main:app` which will select a random port on bootup
 
-for specific port you can use the following:
+for specific port you can do the following:
 
-`uvicorn main:app --reload --port:8000`
-
-The server will reload if you make edits.
+`uvicorn main:app --reload --port:8000` Note: The server will reload if you make edits on the code due to `--reload` flag.
 
 ## Learn More
 

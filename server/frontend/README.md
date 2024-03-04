@@ -6,9 +6,15 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 In the project directory, you can run:
 
+### `npm run build`
+
+Is to build up the the .tsx files under .next enviroment by using Next.js framework.\
+This framework is built on top of Node.js enabling React based web applications functionalities such as server-side rendering and generating static websites.
+
 ### `npm start`
 
-Runs the app in the development mode.\
+Is to install all the required dependencies from package.json\
+Runs the app by using `next start` implicitly.\
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 The page will reload if you make edits.\
