@@ -1,0 +1,186 @@
+{
+	"info": {
+		"_postman_id": "c697b505-87a4-4ebd-beb4-21757b046b4d",
+		"name": "NLPT",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24037191"
+	},
+	"item": [
+		{
+			"name": "http://localhost:8000/healthcheck",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{   \r\n    \"text\" : \"test\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/healthcheck",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"healthcheck"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8000/getOpenSearchIndices",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/getOpenSearchIndices",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"getOpenSearchIndices"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8000/getLLMs",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/getLLMs",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"getLLMs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8000/getRetrievalStrategy",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/getRetrievalStrategy",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"getRetrievalStrategy"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8000/pipeline",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"question\": \"What is a cask disorder?\",\r\n    \"retrieval_strategy\": \"Dense Retrieval\",\r\n    \"index\": \"\",\r\n    \"llm\": \"GPT 3.5 Turbo 0125\",\r\n    \"qt\": \"false\",\r\n    \"chain_type\": \"map_reduce\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/pipeline",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"pipeline"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8000/status",
+			"protocolProfileBehavior": {
+				"strictSSL": false
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8000/testAzure",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/testAzure",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"testAzure"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8000/getChainTypes",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/getChainTypes",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"getChainTypes"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
