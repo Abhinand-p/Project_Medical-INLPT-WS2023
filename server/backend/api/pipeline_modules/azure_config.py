@@ -28,6 +28,7 @@ class AzureManager:
                 credential.get_token("https://management.azure.com/.default")
             except Exception as ex:
                 credential = InteractiveBrowserCredential()
+            print("######### AZURE CREDENTIALS #############")
 
             # Create a resource group
             resource_client = ResourceManagementClient(credential, os.getenv("AZURE_SUBSCRIPTION_KEY"))
@@ -40,6 +41,7 @@ class AzureManager:
                         "location": "westeurope"
                     }
                 )
+            print("######### AZURE RESOURCE GROUP #############")
 
             # Create a workspace
             self.workspace_ml_client = MLClient(
@@ -60,16 +62,26 @@ class AzureManager:
                 )
 
                 ws = self.workspace_ml_client.workspaces.begin_create(ws).result()
+            print("######### AZURE WORKSPACE #############")
 
             # Create deployment
             self.deployment_name = os.getenv("DEPLOYMENT_NAME")
 
             registry_name = "HuggingFace"
-            model_name = "ktrapeznikov/biobert_v1.1_pubmed_squad_v2"
+            model_name = "ktrapeznikov-biobert-v1.1-pubmed-squad-v2"
             model_id = f"azureml://registries/{registry_name}/models/{model_name}/labels/latest"
 
             self.online_endpoint_name=os.getenv("ONLINE_ENDPOINT_NAME")
-            endpoint = self.workspace_ml_client.begin_create_or_update(ManagedOnlineEndpoint(name=self.online_endpoint_name) ).wait()
+
+            try:
+                # return an object that contains metadata for the endpoint
+                endpoint = self.workspace_ml_client.online_endpoints.get(name=self.online_endpoint_name)
+            except Exception as ex:
+                print(ex)
+                endpoint = self.workspace_ml_client.begin_create_or_update(ManagedOnlineEndpoint(name=self.online_endpoint_name) ).wait()
+
+            print("######### AZURE DEPLOYMENT 1 #############")
+
             self.workspace_ml_client.online_deployments.begin_create_or_update(ManagedOnlineDeployment(
                 name=self.deployment_name,
                 endpoint_name=self.online_endpoint_name,
@@ -77,8 +89,21 @@ class AzureManager:
                 instance_type="Standard_DS2_v2",
                 instance_count=1,
             )).wait()
+            print("######### AZURE DEPLOYMENT 2 #############")
+
             endpoint.traffic = {self.deployment_name: 100}
+
             self.workspace_ml_client.begin_create_or_update(self.online_endpoint_name).result()
+            print("######### AZURE DEPLOYMENT 3 #############")
+
+            print("################################# INFO #########################################")
+            # print a selection of the endpoint's metadata
+            print(f"Name: {endpoint.name}\nStatus: {endpoint.provisioning_state}\nDescription: {endpoint.description}")
+            # existing traffic details
+            print(endpoint.traffic)
+            # Get the scoring URI
+            print(endpoint.scoring_uri)
+            print("#################################################################################")
         except Exception as ex:
             print(ex)
             self.msg = ex
@@ -96,8 +121,8 @@ class AzureManager:
             json.dump(query_json, f)
 
         response = self.workspace_ml_client.online_endpoints.invoke(
-            endpoint_name="mlinlpt-az-mhimp", # self.online_endpoint_name,
-            deployment_name="ktrapeznikov-biobert-v1-1-pub-3", # self.deployment_name,
+            endpoint_name=self.online_endpoint_name,# "mlinlpt-az-mhimp",
+            deployment_name=self.deployment_name, # "ktrapeznikov-biobert-v1-1-pub",
             request_file="./query.json")
         print("raw response: \n", response, "\n")
 

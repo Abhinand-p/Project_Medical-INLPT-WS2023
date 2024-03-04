@@ -1,4 +1,4 @@
-# Getting Started with FastAPI and Uvicorn
+# Getting Started with FastAPI and Uvicorn (no docker)
 
 This project was done with [FastApi](https://fastapi.tiangolo.com/tutorial/) and [Uvicorn](https://www.uvicorn.org/).
 
@@ -17,7 +17,7 @@ To run the backend server we need to use Uvicorn for that to instantiate the req
 
 for specific port you can use the following:
 
-`uvicorn main:app --reload --port:5000`
+`uvicorn main:app --reload --port:8000`
 
 The server will reload if you make edits.
 

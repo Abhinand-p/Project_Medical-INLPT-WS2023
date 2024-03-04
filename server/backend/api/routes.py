@@ -125,7 +125,10 @@ def get_answer_from_pipeline(question: str= Body(..., embed=True), retrieval_str
   #   answer = llama7b.query(question, context)
 
   elif llm == llm_list[3]:
-    answer = azure.query(question, context)
+    if index == "e5-base-v2" or index == "distilroberta":
+      answer = azure.query(question, str(context))
+    else:
+      answer = azure.query(question, context)
 
   return answer
 
